@@ -88,18 +88,29 @@ class _MyHomePageState extends State<MyHomePage> {
                   final todo = todos[index];
 
                   return Card(
+                    clipBehavior: Clip.hardEdge,
                     elevation: 7,
                     margin: const EdgeInsets.all(10),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
-                    child: ListTile(
-                      title: Text(todo['title']),
-                      trailing: Checkbox(
-                        value: todo['completed'],
-                        onChanged: (value) {
-                          // Handle checkbox change (optional)
-                        },
+                    child: InkWell(
+                      splashColor: Colors.blue.withAlpha(80),
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(todo['title']),
+                          ),
+                        );
+                      },
+                      child: ListTile(
+                        title: Text(todo['title']),
+                        trailing: Checkbox(
+                          value: todo['completed'],
+                          onChanged: (value) {
+                            // Handle checkbox change (optional)
+                          },
+                        ),
                       ),
                     ),
                   );
