@@ -18,8 +18,7 @@ class MyApp extends StatelessWidget {
       title: 'Todo Test EAL',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorSchemeSeed: Colors.black26,
-        useMaterial3: true,
+        colorSchemeSeed: Colors.blue,
       ),
       home: const MyHomePage(title: 'Todo Test EAL'),
     );
@@ -72,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorSchemeSeed: Colors.cyan,
+        colorSchemeSeed: const Color.fromARGB(255, 148, 252, 30),
       ),
       home: Scaffold(
         appBar: AppBar(
@@ -88,13 +87,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemBuilder: (context, index) {
                   final todo = todos[index];
 
-                  return ListTile(
-                    title: Text(todo['title']),
-                    trailing: Checkbox(
-                      value: todo['completed'],
-                      onChanged: (value) {
-                        // Handle checkbox change (optional)
-                      },
+                  return Card(
+                    elevation: 7,
+                    margin: const EdgeInsets.all(10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: ListTile(
+                      title: Text(todo['title']),
+                      trailing: Checkbox(
+                        value: todo['completed'],
+                        onChanged: (value) {
+                          // Handle checkbox change (optional)
+                        },
+                      ),
                     ),
                   );
                 },
