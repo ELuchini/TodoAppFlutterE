@@ -18,7 +18,8 @@ class MyApp extends StatelessWidget {
       title: 'Todo Test EAL',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorSchemeSeed: Colors.blue,
+        colorSchemeSeed: Colors.greenAccent,
+        useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Todo Test EAL'),
     );
@@ -48,13 +49,6 @@ class _MyHomePageState extends State<MyHomePage> {
     _todos = fetchTodos();
   }
 
-  // void _incrementCounter() {
-  //   getData();
-  //   setState(() {
-  //     _counter++;
-  //   });
-  // }
-
   //Peticiones http tut https://www.youtube.com/watch?v=ad7buTVMUek Flutter http get Fernando Herrera.
   // Future<void> getData() async {
   //   final response =
@@ -69,119 +63,148 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorSchemeSeed: const Color.fromARGB(255, 148, 252, 30),
-      ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Todos'),
-        ),
-        body: FutureBuilder<List<dynamic>>(
-          future: _todos,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final todos = snapshot.data!;
-              return ListView.builder(
-                itemCount: todos.length,
-                itemBuilder: (context, index) {
-                  final todo = todos[index];
+        debugShowCheckedModeBanner: false,
+        theme: Theme.of(context),
+        home: Scaffold(
+          backgroundColor: Theme.of(context).canvasColor, //Colors.white,
+          appBar: AppBar(
+            backgroundColor: Theme.of(context).primaryColor, //Colors.blue,
+            elevation: 5,
+            shadowColor: Theme.of(context).shadowColor,
+            title: const Text(
+              'Tareas',
+              style: TextStyle(
+                fontSize: 25,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          body: FutureBuilder<List<dynamic>>(
+            future: _todos,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final todos = snapshot.data!;
+                return ListView.builder(
+                  itemCount: todos.length,
+                  itemBuilder: (context, index) {
+                    final todo = todos[index];
 
-                  return Card(
-                    clipBehavior: Clip.hardEdge,
-                    elevation: 7,
-                    margin: const EdgeInsets.all(10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: InkWell(
-                      splashColor: Colors.blue.withAlpha(80),
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(todo['title']),
-                          ),
-                        );
-                      },
-                      child: ListTile(
-                        title: Text(todo['title']),
-                        trailing: Checkbox(
-                          value: todo['completed'],
-                          onChanged: (value) {
-                            // Handle checkbox change (optional)
-                          },
-                        ),
-                      ),
-                    ),
-                  );
-                },
+                    return tarjetasTareas(context, todo);
+                  },
+                );
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
+              // Display a loading indicator while waiting
+              return const Center(child: CircularProgressIndicator());
+            },
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              setState(() {
+                _todos = fetchTodos();
+              });
+            },
+            tooltip: 'Actualizar',
+            child: const Icon(Icons.add),
+          ),
+        ));
+  }
+
+  Card tarjetasTareas(BuildContext context, todo) {
+    return Card(
+      color: Theme.of(context).cardTheme.surfaceTintColor,
+      clipBehavior: Clip
+          .hardEdge, //Sigo los datos de un ejemplo de tarjeta que viene en flutter y es cliqueable. Esto limita la animación al tocarla.
+      elevation: 3,
+      margin: const EdgeInsets.only(
+          left: 10.0, right: 10.0, top: 10.0, bottom: 0.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(25),
+      ),
+      child: InkWell(
+        splashColor: Theme.of(context)
+            .focusColor
+            .withAlpha(40), //Colors.lightBlue.withAlpha(40),
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            sheetAnimationStyle: AnimationStyle(
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeIn),
+            builder: (context) {
+              // Using Wrap makes the bottom sheet height the height of the content.
+              // Otherwise, the height will be half the height of the screen.
+              return Wrap(children: [
+                ListTile(
+                  title: Text(todo['title']),
+                  trailing: Checkbox(
+                    value: todo['completed'],
+                    onChanged: (value) {
+                      // Handle checkbox change (optional)
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        cartelBajo(todo),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 300.0),
+                ListTile(
+                  title: const Text('Cerrar'),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ]);
+            },
+          );
+
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   cartelBajo(todo),
+          // );
+        },
+        child: ListTile(
+          title: Text(todo['title']),
+          trailing: Checkbox(
+            value: todo['completed'],
+            onChanged: (value) {
+              // Handle checkbox change (optional)
+              ScaffoldMessenger.of(context).showSnackBar(
+                cartelBajo(todo),
               );
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            }
-            // Display a loading indicator while waiting
-            return const Center(child: CircularProgressIndicator());
-          },
+            },
+          ),
         ),
       ),
     );
   }
+
+  SnackBar cartelBajo(todo) {
+    return SnackBar(
+      duration: const Duration(milliseconds: 400),
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      content: Text(todo['title'] + ' - Usuario: ' + todo['userId'].toString()),
+    );
+  }
 }
-// String cantDatos = 'Cant. Datos: ';
-// String titulo = 'Titulo: ';
 
-// if (todos != null) {
-//   // cantDatos += todos!.length.toString();
-//   cantDatos += "20";
-//   titulo = todos!.title[0].toUpperCase() + todos!.title.substring(1);
-// }
+Future<List<dynamic>> fetchTodos() async {
+  final dio = Dio();
+  final response = await dio.get('https://jsonplaceholder.typicode.com/todos');
 
-// return Scaffold(
-//   appBar: AppBar(
-//     backgroundColor: Theme.of(context).primaryColor,
-//     title: Text(widget.title),
-//   ),
-//   body: Center(
-//     child: ListView(
-//       // mainAxisAlignment: MainAxisAlignment.center,
-//       children: [
-//         Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             const SizedBox(height: 20),
-//             const Text(
-//               'Hoy: ',
-//             ),
-//             Text(
-//               cantDatos, // '$todos' + 'hola',
-//               style: Theme.of(context).textTheme.headlineMedium,
-//             ),
-//             Text(
-//               titulo,
-//               style: Theme.of(context).textTheme.headlineLarge,
-//             ),
-//           ],
-//         ),
-//         Divider(
-//           color: Theme.of(context).primaryColor,
-//           thickness: 2,
-//         ),
+  if (response.statusCode == 200) {
+    return response.data;
+  } else {
+    throw Exception('Failed to load todos');
+  }
+}
 
-//         // ListView.builder(
-//         //     itemCount: pokemon?.abilities.length ?? 0,
-//         //     itemBuilder: (context, index){
-//         //       return ListTile(
-//         //         title: Text(pokemon!.abilities[index].ability.name),
-//         //       );
-//         //     },
-//         //   ),
-//         Divider(
-//           color: Theme.of(context).primaryColor,
-//           thickness: 2,
-//         ),
-//       ],
-//     ),
-//   ),
+
 //   floatingActionButton: Row(
 //     mainAxisSize: MainAxisSize.min,
 //     children: [
@@ -205,15 +228,4 @@ class _MyHomePageState extends State<MyHomePage> {
 // );
 // }
 // }
-//para build el release: flutter build apk --release
-
-Future<List<dynamic>> fetchTodos() async {
-  final dio = Dio();
-  final response = await dio.get('https://jsonplaceholder.typicode.com/todos');
-
-  if (response.statusCode == 200) {
-    return response.data;
-  } else {
-    throw Exception('Failed to load todos');
-  }
-}
+//para build el release: flutter build apk --release++
