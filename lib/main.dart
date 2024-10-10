@@ -208,7 +208,7 @@ Future<List<dynamic>> fetchTodos({int usId = 1}) async {
   final dio = Dio();
   // final response = await dio.get('https://jsonplaceholder.typicode.com/todos');
   final response =
-      await dio.get('http://eduardo.servemp3.com:8080/todos/${usId}');
+      await dio.get('http://eduardo.servemp3.com:8080/todos/$usId');
 
   if (response.statusCode == 200) {
     return response.data;
@@ -216,6 +216,8 @@ Future<List<dynamic>> fetchTodos({int usId = 1}) async {
     throw Exception('Failed to load todos');
   }
 }
+
+
 
 
 //   floatingActionButton: Row(
