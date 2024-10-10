@@ -113,6 +113,16 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Card tarjetasTareas(BuildContext context, todo) {
+    bool isCompleted = false;
+
+    if (todo['completed'] is bool) {
+      isCompleted = todo['completed'];
+    } else if (todo['completed'] == 0) {
+      isCompleted = false;
+    } else {
+      isCompleted = true;
+    }
+
     return Card(
       color: Theme.of(context).cardTheme.surfaceTintColor,
       clipBehavior: Clip
@@ -140,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ListTile(
                   title: Text(todo['title']),
                   trailing: Checkbox(
-                    value: todo['completed'],
+                    value: isCompleted,
                     onChanged: (value) {
                       // Handle checkbox change (optional)
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -167,7 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: ListTile(
           title: Text(todo['title']),
           trailing: Checkbox(
-            value: todo['completed'],
+            value: isCompleted,
             onChanged: (value) {
               // Handle checkbox change (optional)
               ScaffoldMessenger.of(context).showSnackBar(
@@ -188,14 +198,17 @@ class _MyHomePageState extends State<MyHomePage> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
-      content: Text(todo['title'] + ' - Usuario: ' + todo['userId'].toString()),
+      content:
+          Text(todo['title'] + ' - Usuario: ' + todo['user_id'].toString()),
     );
   }
 }
 
-Future<List<dynamic>> fetchTodos() async {
+Future<List<dynamic>> fetchTodos({int usId = 1}) async {
   final dio = Dio();
-  final response = await dio.get('https://jsonplaceholder.typicode.com/todos');
+  // final response = await dio.get('https://jsonplaceholder.typicode.com/todos');
+  final response =
+      await dio.get('http://eduardo.servemp3.com:8080/todos/${usId}');
 
   if (response.statusCode == 200) {
     return response.data;
