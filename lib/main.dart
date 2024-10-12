@@ -5,13 +5,24 @@
 import 'package:dio/dio.dart';
 // import 'package:myapp/infrastructure/models/todos.dart';
 import 'package:flutter/material.dart';
+import 'package:myapp/infrastructure/models/todos.dart';
 // import 'package:permission_handler/permission_handler.dart';
 import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:myapp/providers/todos_provider.dart';
 
-void main() => runApp(const MyApp());
+// void main() => runApp(const TareasE());
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => TodosProvider(),
+      child: const TareasE(),
+    ),
+  );
+}
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class TareasE extends StatelessWidget {
+  const TareasE({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,36 +30,36 @@ class MyApp extends StatelessWidget {
       title: 'Todo Test EAL',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorSchemeSeed: Colors.greenAccent,
+        colorSchemeSeed: Colors.blueAccent,
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Todo Test EAL'),
+      home: const MainPage(title: 'Todo Test EAL'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MainPage extends StatefulWidget {
   final String title;
 
-  const MyHomePage({
+  const MainPage({
     super.key,
     required this.title,
   });
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MainPage> createState() => _MainPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MainPageState extends State<MainPage> {
   // int _counter = 0;
 
-  Future<List<dynamic>>? _todos;
+  // Future<List<dynamic>>? _todos;
 
-  @override
-  void initState() {
-    super.initState();
-    _todos = fetchTodos();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _todos = fetchTodos();
+  // }
 
   //Peticiones http tut https://www.youtube.com/watch?v=ad7buTVMUek Flutter http get Fernando Herrera.
   // Future<void> getData() async {
@@ -81,8 +92,8 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ),
-          body: FutureBuilder<List<dynamic>>(
-            future: _todos,
+          body: FutureBuilder<List<Todos>>(
+            future: context.watch<TodosProvider>().todos,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 final todos = snapshot.data!;
@@ -91,11 +102,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   itemBuilder: (context, index) {
                     final todo = todos[index];
 
-                    return tarjetasTareas(context, todo);
+                    return tarjetasTareas(context, todo, index);
                   },
                 );
               } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
+                return Center(
+                    child: Text('Error: ${snapshot.error}')); //FOR DEBUG.
+                // return Center(// BUILD
+                // child: Text('Error: ${snapshot.error.runtimeType}'));
               }
               // Display a loading indicator while waiting
               return const Center(child: CircularProgressIndicator());
@@ -103,9 +117,9 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
-              setState(() {
-                _todos = fetchTodos();
-              });
+              context
+                  .read<TodosProvider>()
+                  .refresh(); //Usa provider para actualizar.
             },
             tooltip: 'Actualizar',
             child: const Icon(Icons.add),
@@ -113,8 +127,10 @@ class _MyHomePageState extends State<MyHomePage> {
         ));
   }
 
-  Card tarjetasTareas(BuildContext context, todo) {
-    bool isCompleted =
+  Card tarjetasTareas(BuildContext context, todo, indexTodo) {
+    bool isCompleted = todo.completed;
+
+    /* bool isCompleted =
         false; //En estas lineas agrego compatibilidad para campo completed boleano o "boleaano SQL" (entero 1-0).
 
     if (todo['completed'] is bool) {
@@ -123,8 +139,22 @@ class _MyHomePageState extends State<MyHomePage> {
       isCompleted = false;
     } else {
       isCompleted = true;
-    }
+    } */
 
+    var checkbox0 = Checkbox(
+      value: isCompleted,
+      onChanged: (value) async {
+        if (await toggle(id: todo.id, completed: value!)) {
+          setState(() {
+            context.read<TodosProvider>().toggle(indexTodo, value);
+            // todo['completed'] = value;
+          });
+        }
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   cartelBajo(todo),
+        // );
+      },
+    );
     return Card(
       color: Theme.of(context).cardTheme.surfaceTintColor,
       clipBehavior: Clip
@@ -151,19 +181,10 @@ class _MyHomePageState extends State<MyHomePage> {
               // Otherwise, the height will be half the height of the screen.
               return Wrap(children: [
                 ListTile(
-                  title: Text(todo['title']),
-                  trailing: Checkbox(
-                    value: isCompleted,
-                    onChanged: (value) {
-                      // Handle checkbox change (optional)
-
-                      // ScaffoldMessenger.of(context).showSnackBar(
-                      //   cartelBajo(todo),
-                      // );
-                    },
-                  ),
+                  title: Text(todo.title),
+                  trailing: checkbox0,
                 ),
-                const SizedBox(height: 300.0),
+                const SizedBox(height: 200.0),
                 ListTile(
                   title: const Text('Cerrar'),
                   onTap: () {
@@ -179,24 +200,8 @@ class _MyHomePageState extends State<MyHomePage> {
           // );
         },
         child: ListTile(
-          title: Text(todo['title']),
-          trailing: Checkbox(
-            value: isCompleted,
-            onChanged: (value) async {
-              //AL CAMBIAR, EL "value" ES EL VALOR NUEVO.
-              // Handle checkbox change (optional)
-              //print("Pressed. value: $value");
-              if (await toggle(id: todo['id'], completed: value!)) {
-                setState(() {
-                  todo['completed'] = value;
-                  // 'SetState Run. value: $value isCompleted: $isCompleted');
-                });
-              }
-              // ScaffoldMessenger.of(context).showSnackBar(
-              //   cartelBajo(todo),
-              // );
-            },
-          ),
+          title: Text(todo.title),
+          trailing: checkbox0,
         ),
       ),
     );
@@ -211,21 +216,9 @@ class _MyHomePageState extends State<MyHomePage> {
         borderRadius: BorderRadius.circular(20),
       ),
       content:
-          Text(todo['title'] + ' - Usuario: ' + todo['user_id'].toString()),
+          // Text(todo['title'] + ' - Usuario: ' + todo['user_id'].toString()),
+          Text(todo.title + ' - Usuario: ' + todo.user_id.toString()),
     );
-  }
-}
-
-Future<List<dynamic>> fetchTodos({int usId = 1}) async {
-  final dio = Dio();
-  // final response = await dio.get('https://jsonplaceholder.typicode.com/todos');
-  final response =
-      await dio.get('http://eduardo.servemp3.com:8080/todos/$usId');
-
-  if (response.statusCode == 200) {
-    return response.data;
-  } else {
-    throw Exception('Failed to load todos');
   }
 }
 
