@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 // import 'package:myapp/infrastructure/models/todos.dart';
 import 'package:flutter/material.dart';
 // import 'package:permission_handler/permission_handler.dart';
+import 'dart:convert';
 
 void main() => runApp(const MyApp());
 
@@ -113,7 +114,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Card tarjetasTareas(BuildContext context, todo) {
-    bool isCompleted = false;
+    bool isCompleted =
+        false; //En estas lineas agrego compatibilidad para campo completed boleano o "boleaano SQL" (entero 1-0).
 
     if (todo['completed'] is bool) {
       isCompleted = todo['completed'];
@@ -126,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Card(
       color: Theme.of(context).cardTheme.surfaceTintColor,
       clipBehavior: Clip
-          .hardEdge, //Sigo los datos de un ejemplo de tarjeta que viene en flutter y es cliqueable. Esto limita la animación al tocarla.
+          .hardEdge, //Sigo los datos de un ejemplo de tarjeta que viene en flutter y es cliqueable. Esto limita la animación del InkWell al tocar la tarjeta.
       elevation: 3,
       margin: const EdgeInsets.only(
           left: 10.0, right: 10.0, top: 10.0, bottom: 0.0),
@@ -137,6 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
         splashColor: Theme.of(context)
             .focusColor
             .withAlpha(40), //Colors.lightBlue.withAlpha(40),
+        onLongPress: () {},
         onTap: () {
           showModalBottomSheet(
             context: context,
@@ -153,9 +156,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     value: isCompleted,
                     onChanged: (value) {
                       // Handle checkbox change (optional)
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        cartelBajo(todo),
-                      );
+
+                      // ScaffoldMessenger.of(context).showSnackBar(
+                      //   cartelBajo(todo),
+                      // );
                     },
                   ),
                 ),
@@ -178,11 +182,19 @@ class _MyHomePageState extends State<MyHomePage> {
           title: Text(todo['title']),
           trailing: Checkbox(
             value: isCompleted,
-            onChanged: (value) {
+            onChanged: (value) async {
+              //AL CAMBIAR, EL "value" ES EL VALOR NUEVO.
               // Handle checkbox change (optional)
-              ScaffoldMessenger.of(context).showSnackBar(
-                cartelBajo(todo),
-              );
+              //print("Pressed. value: $value");
+              if (await toggle(id: todo['id'], completed: value!)) {
+                setState(() {
+                  todo['completed'] = value;
+                  // 'SetState Run. value: $value isCompleted: $isCompleted');
+                });
+              }
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   cartelBajo(todo),
+              // );
             },
           ),
         ),
@@ -217,8 +229,24 @@ Future<List<dynamic>> fetchTodos({int usId = 1}) async {
   }
 }
 
+Future<bool> toggle({required int id, required bool completed}) async {
+  final data = jsonEncode({
+    'value': completed,
+  });
+  // final jsonData = jsonEncode(data);
+  //print('Data es: $data Y id es: $id'); //Cuando usaba jsonData imprimía ese.
 
+  final dio = Dio();
+  final response =
+      await dio.put('http://eduardo.servemp3.com:8080/todos/$id', data: data);
 
+  if (response.statusCode == 200) {
+    //print('Response: $response.data');
+    return true;
+  } else {
+    throw Exception('Failed to set completed');
+  }
+}
 
 //   floatingActionButton: Row(
 //     mainAxisSize: MainAxisSize.min,
