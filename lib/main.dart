@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 // import 'package:myapp/infrastructure/models/todos.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/infrastructure/models/todos.dart';
+import 'package:myapp/providers/active_todo_provider.dart';
 // import 'package:permission_handler/permission_handler.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
@@ -14,8 +17,11 @@ import 'package:myapp/providers/todos_provider.dart';
 // void main() => runApp(const TareasE());
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => TodosProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => TodosProvider()),
+        ChangeNotifierProvider(create: (context) => ActiveTodoProvider()),
+      ],
       child: const TareasE(),
     ),
   );
@@ -31,7 +37,13 @@ class TareasE extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorSchemeSeed: Colors.blueAccent,
+        brightness: Brightness.light,
         useMaterial3: true,
+      ),
+      darkTheme: ThemeData(
+        colorSchemeSeed: Colors.black,
+        brightness: Brightness.dark,
+        useMaterial3: false,
       ),
       home: const MainPage(title: 'Todo Test EAL'),
     );
@@ -91,43 +103,85 @@ class _MainPageState extends State<MainPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            leading: Consumer<ActiveTodoProvider>(
+                builder: (context, activeTodoProvider, child) {
+              return Text(
+                  "ATodo: ${context.read<ActiveTodoProvider>().aTodoId}",
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold));
+            }),
           ),
-          body: FutureBuilder<List<Todos>>(
-            future: context.watch<TodosProvider>().todos,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                final todos = snapshot.data!;
-                return ListView.builder(
-                  itemCount: todos.length,
-                  itemBuilder: (context, index) {
-                    final todo = todos[index];
+          body: Consumer<TodosProvider>(
+            builder: (context, todosProvider, child) {
+              return FutureBuilder<List<Todos>>(
+                future: TodosProvider().todos,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final todos = snapshot.data!;
+                    return ListView.builder(
+                      itemCount: todos.length,
+                      itemBuilder: (context, index) {
+                        final todo = todos[index];
 
-                    return tarjetasTareas(context, todo, index);
-                  },
-                );
-              } else if (snapshot.hasError) {
-                return Center(
-                    child: Text('Error: ${snapshot.error}')); //FOR DEBUG.
-                // return Center(// BUILD
-                // child: Text('Error: ${snapshot.error.runtimeType}'));
-              }
-              // Display a loading indicator while waiting
-              return const Center(child: CircularProgressIndicator());
+                        return tarjetasTareas(context, todo, index);
+                      },
+                    );
+                  } else if (snapshot.hasError) {
+                    // return Center(
+                    // child: Text('Error: ${snapshot.error}')); //FOR DEBUG.
+                    return Center(
+                        child: Text(
+                            'Error: ${snapshot.error.runtimeType}')); //FOR BUILD
+                  }
+                  // Display a loading indicator while waiting
+                  return const Center(child: CircularProgressIndicator());
+                },
+              );
             },
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              context
-                  .read<TodosProvider>()
-                  .refresh(); //Usa provider para actualizar.
-            },
-            tooltip: 'Actualizar',
-            child: const Icon(Icons.add),
+          floatingActionButton: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              FloatingActionButton(
+                onPressed: () {
+                  late Todos todoNueva = Todos(
+                      userId: 1,
+                      id: -1,
+                      title: '',
+                      completed: false,
+                      sharedWithId: null);
+                  modalBSEditTask(context, todoNueva);
+                },
+                tooltip: 'Nuevo',
+                child: const Icon(Icons.add),
+              ),
+              const SizedBox(width: 7),
+              // SizedBox(width: 10)
+              FloatingActionButton(
+                onPressed: () {
+                  context.read<TodosProvider>().refresh();
+                }, //Usa provider para actualizar.
+                tooltip: 'Actualizar',
+                child: const Icon(Icons.refresh),
+              ),
+            ],
           ),
+
+          // floatingActionButton: FloatingActionButton(
+          //   onPressed: () {
+          //     context
+          // .read<TodosProvider>()
+          // .refresh(); //Usa provider para actualizar.
+          //   tooltip: 'Actualizar',
+          //   child: const Icon(Icons.refresh),
+          // ),
         ));
   }
 
   Card tarjetasTareas(BuildContext context, todo, indexTodo) {
+    /* int idDeTodo = todo.id; */
     bool isCompleted = todo.completed;
 
     /* bool isCompleted =
@@ -144,17 +198,31 @@ class _MainPageState extends State<MainPage> {
     var checkbox0 = Checkbox(
       value: isCompleted,
       onChanged: (value) async {
-        if (await toggle(id: todo.id, completed: value!)) {
-          setState(() {
-            context.read<TodosProvider>().toggle(indexTodo, value);
+        /* print("En cambio, El Valor es: $value");
+        print("y todo completed es: $todo.completed"); */
+        if (await toggleBd(id: todo.id, completed: value!)) {
+          /* setState(() {
+            // context.read<TodosProvider>().toggle(indexTodo, value);
             // todo['completed'] = value;
-          });
+          }); */
+          /* print("prev read valor: $value y completed $todo.completed"); */
+          context.read<TodosProvider>().toggle(indexTodo, value);
+
+          /* print("post read valor: $value y completed $todo.completed"); */
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            cartelBajo(todo),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Error al actualizar el estado'),
+            ),
+          );
         }
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   cartelBajo(todo),
-        // );
       },
     );
+
     return Card(
       color: Theme.of(context).cardTheme.surfaceTintColor,
       clipBehavior: Clip
@@ -169,7 +237,13 @@ class _MainPageState extends State<MainPage> {
         splashColor: Theme.of(context)
             .focusColor
             .withAlpha(40), //Colors.lightBlue.withAlpha(40),
-        onLongPress: () {},
+        borderRadius: BorderRadius.circular(25),
+        onLongPress: () {
+          context.read<ActiveTodoProvider>().setActiveTodo(todo);
+          ScaffoldMessenger.of(context).showSnackBar(
+            eliminarTarea(),
+          );
+        },
         onTap: () {
           showModalBottomSheet(
             context: context,
@@ -217,12 +291,146 @@ class _MainPageState extends State<MainPage> {
       ),
       content:
           // Text(todo['title'] + ' - Usuario: ' + todo['user_id'].toString()),
-          Text(todo.title + ' - Usuario: ' + todo.user_id.toString()),
+          Center(
+        child: Text(
+          !todo.completed ? "Completado" : "Pendiente",
+          style: TextStyle(
+              fontSize: 20, color: !todo.completed ? Colors.green : Colors.red),
+        ),
+      ),
     );
+  }
+
+  SnackBar eliminarTarea() {
+    /* print(
+        'Eliminar tarea ${context.read<ActiveTodoProvider>().aTodoId.toString()}'); */
+    return SnackBar(
+      duration: const Duration(milliseconds: 2500),
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      content:
+          // Text(todo['title'] + ' - Usuario: ' + todo['user_id'].toString()),
+          Text(
+        "¿Querés eliminar la tarea?: ${context.read<ActiveTodoProvider>().aTodoId}- ${context.read<ActiveTodoProvider>().activeTodo.title} ",
+        style: const TextStyle(
+          fontSize: 12,
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      action: SnackBarAction(
+        label: 'Eliminar',
+        textColor: Colors.red,
+        onPressed: () async {
+          if (await deleteTodo(context.read<ActiveTodoProvider>().activeTodo)) {
+            context.read<TodosProvider>().refresh();
+            /* ScaffoldMessenger.of(context).showSnackBar(//PENDIENTE RESOLVER MOSTRAR CARTEL.
+              const SnackBar(
+                content: Text('Tarea eliminada.'),
+                duration: Duration(milliseconds: 500),
+              ),
+            ); */
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Error al eliminar la tarea.'),
+              ),
+            );
+          }
+
+          /* Navigator.pop(context); //Comento porque me cerraba la pantalla principal.*/
+        },
+      ),
+    );
+  }
+
+  void modalBSEditTask(BuildContext context, Todos todoNueva) {
+    showModalBottomSheet(
+        context: context,
+        sheetAnimationStyle: AnimationStyle(
+            duration: const Duration(milliseconds: 500), curve: Curves.easeIn),
+        builder: (context) {
+          // Using Wrap makes the bottom sheet height the height of the content.
+          // Otherwise, the height will be half the height of the screen.
+          return Scaffold(
+              appBar: AppBar(
+                title: const Text('Nueva Tarea'),
+              ),
+              body: Center(
+                child: Wrap(
+                  children: [
+                    TextField(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Tarea',
+                      ),
+                      onChanged: (value) {
+                        todoNueva.title = value;
+                      },
+                      onSubmitted: (value) {},
+                    ),
+                    const SizedBox(height: 50),
+                    ElevatedButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Cancelando creación de tarea.'),
+                          ),
+                        );
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Cancelar'),
+                    ),
+                    // Suggested code may be subject to a license. Learn more: ~LicenseLog:3471257838.
+                    const SizedBox(height: 50),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (todoNueva.title != "") {
+                          addNewTask(context, todoNueva);
+                          context.read<TodosProvider>().refresh();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Tarea creada.'),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Cancelando creación de tarea.'),
+                            ),
+                          );
+                        }
+                        // Future.delayed(const Duration(seconds: 3));
+                        Timer(const Duration(seconds: 5), () {
+                          setState(() {});
+                          Navigator.pop(context);
+                        });
+                        // Navigator.pop(context);
+                      },
+                      child: const Text('Guardar'),
+                    ),
+                  ],
+                ),
+              ));
+        });
+  }
+
+  Future<bool> deleteTodo(todo) async {
+    final dio = Dio();
+    final response =
+        await dio.delete('http://eduardo.servemp3.com:8080/todos/${todo.id}');
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw Exception('Failed to delete todo');
+    }
   }
 }
 
-Future<bool> toggle({required int id, required bool completed}) async {
+Future<bool> toggleBd({required int id, required bool completed}) async {
   final data = jsonEncode({
     'value': completed,
   });
@@ -238,6 +446,41 @@ Future<bool> toggle({required int id, required bool completed}) async {
     return true;
   } else {
     throw Exception('Failed to set completed');
+  }
+}
+
+Future<void> addNewTask(BuildContext context, Todos todoNueva) async {
+  var dataTodo = todoNueva.toNewJson();
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(dataTodo.toString()),
+    ),
+  );
+
+  final dio = Dio();
+  final response = await dio.post(
+    'http://eduardo.servemp3.com:8080/todos',
+    data: todoNueva.toNewJson(),
+  );
+
+  /* print(response.statusCode.toString());
+  print(response.data.toString()); */
+  if (response.statusCode == 201) {
+    //responde 201 por CREADO.
+    /* print(response.statusCode.toString());
+    print(response.data.toString()); */
+    /* context.read<TodosProvider>().refresh(); */
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Tarea creada BD.'),
+      ),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Error al crear la tarea BD.'),
+      ),
+    );
   }
 }
 

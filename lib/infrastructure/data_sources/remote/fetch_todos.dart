@@ -10,10 +10,10 @@ Future<List<Todos>> fetchTodos({int usId = 1}) async {
       await dio.get('http://eduardo.servemp3.com:8080/todos/$usId');
 
   if (response.statusCode == 200) {
-    print(response.data.toString());
-    print(response.data.runtimeType);
-    print(response.data[0].runtimeType);
-    print(response.data[0].toString());
+    // print(response.data.toString());
+    // print(response.data.runtimeType);
+    // print(response.data[0].runtimeType);
+    // print(response.data[0].toString());
     // todosData = response.data;
     // todosData = response.data.map((json) => Todos.fromJson(json)).toList();
     // todosData = tareasDesdeAPI.map((json) => Tarea.fromJson(json)).toList();

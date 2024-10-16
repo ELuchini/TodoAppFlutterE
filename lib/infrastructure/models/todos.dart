@@ -6,6 +6,8 @@
 // import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 
+/* import 'package:flutter/foundation.dart'; */
+
 // part 'todos.g.dart';
 
 List<Todos> todosFromJson(String str) =>
@@ -16,11 +18,17 @@ String todosToJson(List<Todos> data) =>
 
 bool convertToBool(dynamic value) {
   if (value is int) {
-    print('Value is int: $value');
-    print(value == 1);
+    /* if (kDebugMode) {
+      print('Value is int: $value');
+    }
+    if (kDebugMode) {
+      print(value == 1);
+    } */
     return value == 1;
   } else if (value is bool) {
-    print('Value is bool: $value');
+    /* if (kDebugMode) {
+      print('Value is bool: $value');
+    } */
     return value;
   } else {
     // Manejar valores inesperados, por ejemplo, lanzar una excepción
@@ -30,32 +38,66 @@ bool convertToBool(dynamic value) {
 
 // @JsonSerializable()//https://docs.flutter.dev/data-and-backend/serialization/json?gad_source=1&gclid=CjwKCAjwvKi4BhABEiwAH2gcw0visVoXRvDYrKC-8hHE3lypkUBBKO5l4qHpLJ97D2HkdC1I3bHEWxoCRZ4QAvD_BwE&gclsrc=aw.ds
 class Todos {
-  int? userId;
-  int id;
+  /* int userId;
+  int? id;
   String title;
-  bool completed;
+  bool completed; */
 
-  Todos({
+  /* Todos({
     required this.userId,
     required this.id,
     required this.title,
     required this.completed,
+  }); */
+
+  int id;
+  String title;
+  bool completed;
+  int userId;
+  int? sharedWithId;
+
+  Todos({
+    required this.id,
+    required this.title,
+    required this.completed,
+    required this.userId,
+    required this.sharedWithId,
   });
 
-  factory Todos.fromJson(Map<String, dynamic> json) => Todos(
+/*   factory Todos.fromJson(Map<String, dynamic> json) => Todos(
         userId: json["userId"] as int?,
         id: json["id"],
         title: json["title"],
         completed: convertToBool(json["completed"]),
+      ); */
+  factory Todos.fromJson(Map<String, dynamic> json) => Todos(
+        id: json["id"],
+        title: json["title"],
+        completed: convertToBool(json["completed"]),
+        userId: json["user_id"],
+        sharedWithId: json["shared_with_id"],
       );
 
-  Map<String, dynamic> toJson() => {
+  /* Map<String, dynamic> toJson() => {
         "userId": userId,
         "id": id,
         "title": title,
         "completed": completed,
+      }; */
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "title": title,
+        "completed": completed,
+        "user_id": userId,
+        "shared_with_id": sharedWithId,
       };
 
-  /* factory Todos.fromJson(Map<String, dynamic> json) => _$TodosFromJson(json);
-  Map<String, dynamic> toJson() => _$TodosToJson(this); */
+  Map<String, dynamic> toNewJson() => {
+        "user_id": userId,
+        "title": title,
+      };
+
+  Map<String, dynamic> toDelJson() => {
+        "id": id,
+      };
 }

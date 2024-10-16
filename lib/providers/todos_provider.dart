@@ -9,11 +9,28 @@ class TodosProvider extends ChangeNotifier {
   Future<List<Todos>>? get todos =>
       _todos; //El getter es el que voy a acceder dodos lados.
 
+  /* no sirven porque entrgan un tipo Future, que no funciona.
+  Future<bool> Function(int) get todoCompleted => (int idTodo) async {
+        List<Todos>? tempTodos = await _todos;
+        if (tempTodos != null) {
+          return tempTodos[idTodo].completed;
+        }
+        return false;
+      };
+
+  bool Function(int) get todoCompletedOk => (int idTodo) {
+        List<Todos>? tempTodos = _todos as List<Todos>?;
+        if (tempTodos != null) {
+          return tempTodos[idTodo].completed;
+        }
+        return false;
+      }; */
+
   // Todosprovider() {
   //   _todos = fetchTodos();
   // }
 
-  void refresh() {
+  Future<void> refresh() async {
     _todos = fetchTodos();
     notifyListeners();
   }
@@ -26,4 +43,8 @@ class TodosProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /* void add(Todos todoNueva) {
+    
+  } */
 }
