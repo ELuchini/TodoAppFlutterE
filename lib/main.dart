@@ -3,6 +3,7 @@
 // that can be found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:dio/dio.dart';
 // import 'package:myapp/infrastructure/models/todos.dart';
@@ -41,9 +42,9 @@ class TareasE extends StatelessWidget {
         useMaterial3: true,
       ),
       darkTheme: ThemeData(
-        colorSchemeSeed: Colors.black,
+        colorSchemeSeed: const Color.fromARGB(0, 0, 50, 1),
         brightness: Brightness.dark,
-        useMaterial3: false,
+        useMaterial3: true,
       ),
       home: const MainPage(title: 'Todo Test EAL'),
     );
@@ -129,11 +130,11 @@ class _MainPageState extends State<MainPage> {
                       },
                     );
                   } else if (snapshot.hasError) {
-                    // return Center(
-                    // child: Text('Error: ${snapshot.error}')); //FOR DEBUG.
                     return Center(
+                        child: Text('Error: ${snapshot.error}')); //FOR DEBUG.
+                    /* return Center(
                         child: Text(
-                            'Error: ${snapshot.error.runtimeType}')); //FOR BUILD
+                            'Error: ${snapshot.error.runtimeType}')); */ //FOR BUILD
                   }
                   // Display a loading indicator while waiting
                   return const Center(child: CircularProgressIndicator());
@@ -206,19 +207,22 @@ class _MainPageState extends State<MainPage> {
             // todo['completed'] = value;
           }); */
           /* print("prev read valor: $value y completed $todo.completed"); */
-          context.read<TodosProvider>().toggle(indexTodo, value);
+          if (context.mounted) {
+            context.read<TodosProvider>().toggle(indexTodo, value);
+            ScaffoldMessenger.of(context).showSnackBar(
+              cartelBajo(todo),
+            );
+          }
 
           /* print("post read valor: $value y completed $todo.completed"); */
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            cartelBajo(todo),
-          );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Error al actualizar el estado'),
-            ),
-          );
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Error al actualizar el estado'),
+              ),
+            );
+          }
         }
       },
     );
@@ -239,9 +243,10 @@ class _MainPageState extends State<MainPage> {
             .withAlpha(40), //Colors.lightBlue.withAlpha(40),
         borderRadius: BorderRadius.circular(25),
         onLongPress: () {
+          final BuildContext contextLista = context;
           context.read<ActiveTodoProvider>().setActiveTodo(todo);
           ScaffoldMessenger.of(context).showSnackBar(
-            eliminarTarea(),
+            eliminarTarea(contextLista),
           );
         },
         onTap: () {
@@ -301,44 +306,52 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  SnackBar eliminarTarea() {
+  SnackBar eliminarTarea(BuildContext currentContext) {
     /* print(
         'Eliminar tarea ${context.read<ActiveTodoProvider>().aTodoId.toString()}'); */
     return SnackBar(
       duration: const Duration(milliseconds: 2500),
       behavior: SnackBarBehavior.floating,
-      margin: const EdgeInsets.all(10),
+      margin: const EdgeInsets.all(3),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
-      content:
-          // Text(todo['title'] + ' - Usuario: ' + todo['user_id'].toString()),
+      content: Row(
+        children: [
+          Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
           Text(
-        "¿Querés eliminar la tarea?: ${context.read<ActiveTodoProvider>().aTodoId}- ${context.read<ActiveTodoProvider>().activeTodo.title} ",
-        style: const TextStyle(
-          fontSize: 12,
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-        ),
+            /* "¿Querés eliminar la tarea?: ${context.read<ActiveTodoProvider>().aTodoId}- ${context.read<ActiveTodoProvider>().activeTodo.title} ", */
+            "¿Eliminas la tarea?: ${context.read<ActiveTodoProvider>().activeTodo.title.substring(0, min(context.read<ActiveTodoProvider>().activeTodo.title.characters.length, 18))}...",
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
       action: SnackBarAction(
         label: 'Eliminar',
         textColor: Colors.red,
         onPressed: () async {
+          /* final BuildContext currentContext = context; */
           if (await deleteTodo(context.read<ActiveTodoProvider>().activeTodo)) {
-            context.read<TodosProvider>().refresh();
-            /* ScaffoldMessenger.of(context).showSnackBar(//PENDIENTE RESOLVER MOSTRAR CARTEL.
-              const SnackBar(
-                content: Text('Tarea eliminada.'),
-                duration: Duration(milliseconds: 500),
-              ),
-            ); */
+            if (currentContext.mounted) {
+              currentContext.read<TodosProvider>().refresh();
+              ScaffoldMessenger.of(currentContext).showSnackBar(
+                const SnackBar(
+                  content: Text('Tarea eliminada.'),
+                  duration: Duration(milliseconds: 500),
+                ),
+              );
+            }
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Error al eliminar la tarea.'),
-              ),
-            );
+            if (currentContext.mounted) {
+              ScaffoldMessenger.of(currentContext).showSnackBar(
+                const SnackBar(
+                  content: Text('Error al eliminar la tarea.'),
+                ),
+              );
+            }
           }
 
           /* Navigator.pop(context); //Comento porque me cerraba la pantalla principal.*/
@@ -350,6 +363,11 @@ class _MainPageState extends State<MainPage> {
   void modalBSEditTask(BuildContext context, Todos todoNueva) {
     showModalBottomSheet(
         context: context,
+        showDragHandle: true,
+        isScrollControlled: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
         sheetAnimationStyle: AnimationStyle(
             duration: const Duration(milliseconds: 500), curve: Curves.easeIn),
         builder: (context) {
@@ -360,7 +378,7 @@ class _MainPageState extends State<MainPage> {
                 title: const Text('Nueva Tarea'),
               ),
               body: Center(
-                child: Wrap(
+                child: Column(
                   children: [
                     TextField(
                       decoration: const InputDecoration(
@@ -371,47 +389,63 @@ class _MainPageState extends State<MainPage> {
                         todoNueva.title = value;
                       },
                       onSubmitted: (value) {},
+                      autofocus: true,
                     ),
-                    const SizedBox(height: 50),
-                    ElevatedButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Cancelando creación de tarea.'),
-                          ),
-                        );
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Cancelar'),
+                    const SizedBox(
+                      height: 10,
+                      width: 10,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Cancelando...',
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold)),
+                                duration: Duration(milliseconds: 500),
+                              ),
+                            );
+                            await Future.delayed(
+                                const Duration(milliseconds: 800));
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Cancelar'),
+                        ),
+                        const SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (todoNueva.title != "") {
+                              addNewTask(context, todoNueva);
+                              context.read<TodosProvider>().refresh();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Tarea creada.'),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text('Cancelando creación de tarea.'),
+                                ),
+                              );
+                            }
+                            // Future.delayed(const Duration(seconds: 3));
+                            Timer(const Duration(seconds: 2), () {
+                              setState(() {});
+                              Navigator.pop(context);
+                            });
+                            // Navigator.pop(context);
+                          },
+                          child: const Text('Guardar'),
+                        ),
+                      ],
                     ),
                     // Suggested code may be subject to a license. Learn more: ~LicenseLog:3471257838.
-                    const SizedBox(height: 50),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (todoNueva.title != "") {
-                          addNewTask(context, todoNueva);
-                          context.read<TodosProvider>().refresh();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Tarea creada.'),
-                            ),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Cancelando creación de tarea.'),
-                            ),
-                          );
-                        }
-                        // Future.delayed(const Duration(seconds: 3));
-                        Timer(const Duration(seconds: 5), () {
-                          setState(() {});
-                          Navigator.pop(context);
-                        });
-                        // Navigator.pop(context);
-                      },
-                      child: const Text('Guardar'),
-                    ),
                   ],
                 ),
               ));
@@ -463,24 +497,24 @@ Future<void> addNewTask(BuildContext context, Todos todoNueva) async {
     data: todoNueva.toNewJson(),
   );
 
-  /* print(response.statusCode.toString());
-  print(response.data.toString()); */
   if (response.statusCode == 201) {
     //responde 201 por CREADO.
-    /* print(response.statusCode.toString());
-    print(response.data.toString()); */
-    /* context.read<TodosProvider>().refresh(); */
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Tarea creada BD.'),
-      ),
-    );
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tarea creada BD.'),
+        ),
+      );
+    }
   } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Error al crear la tarea BD.'),
-      ),
-    );
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error al crear la tarea BD.'),
+        ),
+      );
+    }
   }
 }
 
