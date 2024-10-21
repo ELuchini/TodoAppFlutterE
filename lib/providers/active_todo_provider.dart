@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:myapp/infrastructure/models/todos.dart';
 
 class ActiveTodoProvider extends ChangeNotifier {
-  Todos _activeTodo =
+  final Todos _activeTodo =
       Todos(userId: 1, id: -1, title: '', completed: false, sharedWithId: null);
 
   Todos get activeTodo => _activeTodo;

@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math';
 
-import 'package:dio/dio.dart';
 // import 'package:myapp/infrastructure/models/todos.dart';
 import 'package:flutter/material.dart';
+import 'package:myapp/bs_edit_task.dart';
+import 'package:myapp/infrastructure/data_sources/bd_op.dart';
 import 'package:myapp/infrastructure/models/todos.dart';
 import 'package:myapp/providers/active_todo_provider.dart';
 // import 'package:permission_handler/permission_handler.dart';
-import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:myapp/providers/todos_provider.dart';
 
@@ -321,7 +320,7 @@ class _MainPageState extends State<MainPage> {
           Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
           Text(
             /* "¿Querés eliminar la tarea?: ${context.read<ActiveTodoProvider>().aTodoId}- ${context.read<ActiveTodoProvider>().activeTodo.title} ", */
-            "¿Eliminas la tarea?: ${context.read<ActiveTodoProvider>().activeTodo.title.substring(0, min(context.read<ActiveTodoProvider>().activeTodo.title.characters.length, 18))}...",
+            "¿Querés eliminar la tarea?: \n${context.read<ActiveTodoProvider>().activeTodo.title.substring(0, min(context.read<ActiveTodoProvider>().activeTodo.title.characters.length, 25))}...",
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -360,163 +359,14 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  void modalBSEditTask(BuildContext context, Todos todoNueva) {
-    showModalBottomSheet(
-        context: context,
-        showDragHandle: true,
-        isScrollControlled: true,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        sheetAnimationStyle: AnimationStyle(
-            duration: const Duration(milliseconds: 500), curve: Curves.easeIn),
-        builder: (context) {
-          // Using Wrap makes the bottom sheet height the height of the content.
-          // Otherwise, the height will be half the height of the screen.
-          return Scaffold(
-              appBar: AppBar(
-                title: const Text('Nueva Tarea'),
-              ),
-              body: Center(
-                child: Column(
-                  children: [
-                    TextField(
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Tarea',
-                      ),
-                      onChanged: (value) {
-                        todoNueva.title = value;
-                      },
-                      onSubmitted: (value) {},
-                      autofocus: true,
-                    ),
-                    const SizedBox(
-                      height: 10,
-                      width: 10,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () async {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Cancelando...',
-                                    style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold)),
-                                duration: Duration(milliseconds: 500),
-                              ),
-                            );
-                            await Future.delayed(
-                                const Duration(milliseconds: 800));
-                            Navigator.pop(context);
-                          },
-                          child: const Text('Cancelar'),
-                        ),
-                        const SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            if (todoNueva.title != "") {
-                              addNewTask(context, todoNueva);
-                              context.read<TodosProvider>().refresh();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Tarea creada.'),
-                                ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content:
-                                      Text('Cancelando creación de tarea.'),
-                                ),
-                              );
-                            }
-                            // Future.delayed(const Duration(seconds: 3));
-                            Timer(const Duration(seconds: 2), () {
-                              setState(() {});
-                              Navigator.pop(context);
-                            });
-                            // Navigator.pop(context);
-                          },
-                          child: const Text('Guardar'),
-                        ),
-                      ],
-                    ),
-                    // Suggested code may be subject to a license. Learn more: ~LicenseLog:3471257838.
-                  ],
-                ),
-              ));
-        });
-  }
-
-  Future<bool> deleteTodo(todo) async {
-    final dio = Dio();
-    final response =
-        await dio.delete('http://eduardo.servemp3.com:8080/todos/${todo.id}');
-    if (response.statusCode == 200) {
-      return true;
-    } else {
-      throw Exception('Failed to delete todo');
-    }
-  }
+  //Bs Edit Task ubic.
+  //Delete todo Ubic.
 }
 
-Future<bool> toggleBd({required int id, required bool completed}) async {
-  final data = jsonEncode({
-    'value': completed,
-  });
-  // final jsonData = jsonEncode(data);
-  //print('Data es: $data Y id es: $id'); //Cuando usaba jsonData imprimía ese.
+//ToggleBD Ubic.
+//addNewTask Ubic.
 
-  final dio = Dio();
-  final response =
-      await dio.put('http://eduardo.servemp3.com:8080/todos/$id', data: data);
 
-  if (response.statusCode == 200) {
-    //print('Response: $response.data');
-    return true;
-  } else {
-    throw Exception('Failed to set completed');
-  }
-}
-
-Future<void> addNewTask(BuildContext context, Todos todoNueva) async {
-  var dataTodo = todoNueva.toNewJson();
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(dataTodo.toString()),
-    ),
-  );
-
-  final dio = Dio();
-  final response = await dio.post(
-    'http://eduardo.servemp3.com:8080/todos',
-    data: todoNueva.toNewJson(),
-  );
-
-  if (response.statusCode == 201) {
-    //responde 201 por CREADO.
-
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Tarea creada BD.'),
-        ),
-      );
-    }
-  } else {
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error al crear la tarea BD.'),
-        ),
-      );
-    }
-  }
-}
 
 //   floatingActionButton: Row(
 //     mainAxisSize: MainAxisSize.min,
