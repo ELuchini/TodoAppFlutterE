@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'infrastructure/data_sources/bd_op.dart';
 import 'infrastructure/models/todos.dart';
 
-void modalBSEditTask(BuildContext context, Todos todoNueva) {
+void modalBSEditTask(BuildContext context, Todos todoToEdit) {
   showModalBottomSheet(
       context: context,
       showDragHandle: true,
@@ -33,7 +33,7 @@ void modalBSEditTask(BuildContext context, Todos todoNueva) {
                       labelText: 'Tarea',
                     ),
                     onChanged: (value) {
-                      todoNueva.title = value;
+                      todoToEdit.title = value;
                     },
                     onSubmitted: (value) {},
                     autofocus: true,
@@ -65,8 +65,8 @@ void modalBSEditTask(BuildContext context, Todos todoNueva) {
                       const SizedBox(width: 10),
                       ElevatedButton(
                         onPressed: () {
-                          if (todoNueva.title != "") {
-                            addNewTask(context, todoNueva);
+                          if (todoToEdit.title != "") {
+                            addNewTask(context, todoToEdit);
                             context.read<TodosProvider>().refresh();
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -96,7 +96,7 @@ void modalBSEditTask(BuildContext context, Todos todoNueva) {
               ),
             ));
       }).then((value) {
-    if (value != null) {
+    if (value != "") {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(value,
             /* 'Cancelando...', */

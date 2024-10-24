@@ -1,14 +1,15 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:myapp/constants.dart';
 
 import '../models/todos.dart';
 
 Future<bool> deleteTodo(todo) async {
   final dio = Dio();
-  final response =
-      await dio.delete('http://eduardo.servemp3.com:8080/todos/${todo.id}');
+  final response = await dio.delete('http://$url:8080/todos/${todo.id}');
   if (response.statusCode == 200) {
     return true;
   } else {
@@ -24,8 +25,7 @@ Future<bool> toggleBd({required int id, required bool completed}) async {
   //print('Data es: $data Y id es: $id'); //Cuando usaba jsonData imprimía ese.
 
   final dio = Dio();
-  final response =
-      await dio.put('http://eduardo.servemp3.com:8080/todos/$id', data: data);
+  final response = await dio.put('http://$url:8080/todos/$id', data: data);
 
   if (response.statusCode == 200) {
     //print('Response: $response.data');
@@ -37,16 +37,15 @@ Future<bool> toggleBd({required int id, required bool completed}) async {
 
 Future<void> addNewTask(BuildContext context, Todos todoNueva) async {
   var dataTodo = todoNueva.toNewJson();
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(dataTodo.toString()),
-    ),
-  );
+
+  if (kDebugMode) {
+    print(dataTodo.toString());
+  }
 
   final dio = Dio();
   final response = await dio.post(
-    'http://eduardo.servemp3.com:8080/todos',
-    data: todoNueva.toNewJson(),
+    'http://$url:8080/todos',
+    data: dataTodo,
   );
 
   if (response.statusCode == 201) {
@@ -64,6 +63,31 @@ Future<void> addNewTask(BuildContext context, Todos todoNueva) async {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Error al crear la tarea BD.'),
+        ),
+      );
+    }
+  }
+}
+
+Future<void> updateTask(BuildContext context, Todos todoToUpdate) async {
+  var dataTodo = todoToUpdate.toJson();
+  if (kDebugMode) {
+    print(dataTodo.toString());
+  }
+
+  final dio = Dio();
+  final response = await dio.put(
+    'http://$url:8080/todos/${todoToUpdate.id}',
+    data: dataTodo,
+  );
+
+  if (response.statusCode == 200) {
+    //responde 200 por OK.
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tarea actualizada BD.'),
         ),
       );
     }

@@ -5,6 +5,7 @@
 import 'dart:math';
 
 // import 'package:myapp/infrastructure/models/todos.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/bs_edit_task.dart';
 import 'package:myapp/infrastructure/data_sources/bd_op.dart';
@@ -70,18 +71,7 @@ class _MainPageState extends State<MainPage> {
   // @override
   // void initState() {
   //   super.initState();
-  //   _todos = fetchTodos();
-  // }
 
-  //Peticiones http tut https://www.youtube.com/watch?v=ad7buTVMUek Flutter http get Fernando Herrera.
-  // Future<void> getData() async {
-  //   final response =
-  //       await Dio().get('https://jsonplaceholder.typicode.com/todos');
-  //   todos = Todos.fromJson(jsonDecode(response.data));
-
-  //   setState(() {
-  //     //Aviso a flutter que se actualizó el state.
-  //   });
   // }
 
   @override
@@ -89,123 +79,105 @@ class _MainPageState extends State<MainPage> {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: Theme.of(context),
-        home: Scaffold(
-          backgroundColor: Theme.of(context).canvasColor, //Colors.white,
-          appBar: AppBar(
-            backgroundColor: Theme.of(context).primaryColor, //Colors.blue,
-            elevation: 5,
-            shadowColor: Theme.of(context).shadowColor,
-            title: const Text(
-              'Tareas',
-              style: TextStyle(
-                fontSize: 25,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+        home: Consumer<TodosProvider>(builder: (context, todosProvider, child) {
+          return Scaffold(
+            backgroundColor: Theme.of(context).canvasColor, //Colors.white,
+            appBar: AppBar(
+              backgroundColor: Theme.of(context).primaryColor, //Colors.blue,
+              elevation: 5,
+              shadowColor: Theme.of(context).shadowColor,
+              title: const Text(
+                'Tareas',
+                style: TextStyle(
+                  fontSize: 25,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+              leading: Consumer<ActiveTodoProvider>(
+                  builder: (context, activeTodoProvider, child) {
+                return Text("AT: ${activeTodoProvider.aTodoId}",
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 8,
+                        fontWeight: FontWeight.w600));
+              }),
             ),
-            leading: Consumer<ActiveTodoProvider>(
-                builder: (context, activeTodoProvider, child) {
-              return Text(
-                  "ATodo: ${context.read<ActiveTodoProvider>().aTodoId}",
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold));
-            }),
-          ),
-          body: Consumer<TodosProvider>(
-            builder: (context, todosProvider, child) {
-              return FutureBuilder<List<Todos>>(
-                future: TodosProvider().todos,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    final todos = snapshot.data!;
-                    return ListView.builder(
-                      itemCount: todos.length,
-                      itemBuilder: (context, index) {
-                        final todo = todos[index];
+            body: FutureBuilder<List<Todos>>(
+              future: todosProvider.todos,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final todos = snapshot.data!;
+                  return ListView.builder(
+                    itemCount: todos.length,
+                    itemBuilder: (context, index) {
+                      final todo = todos[index];
 
-                        return tarjetasTareas(context, todo, index);
-                      },
-                    );
-                  } else if (snapshot.hasError) {
+                      return tarjetasTareas(context, todo, index);
+                    },
+                  );
+                } else if (snapshot.hasError) {
+                  if (kDebugMode) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else {
                     return Center(
-                        child: Text('Error: ${snapshot.error}')); //FOR DEBUG.
-                    /* return Center(
-                        child: Text(
-                            'Error: ${snapshot.error.runtimeType}')); */ //FOR BUILD
+                        child: Text('Error: ${snapshot.error.runtimeType}'));
                   }
-                  // Display a loading indicator while waiting
-                  return const Center(child: CircularProgressIndicator());
-                },
-              );
-            },
-          ),
-          floatingActionButton: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              FloatingActionButton(
-                onPressed: () {
-                  late Todos todoNueva = Todos(
-                      userId: 1,
-                      id: -1,
-                      title: '',
-                      completed: false,
-                      sharedWithId: null);
-                  modalBSEditTask(context, todoNueva);
-                },
-                tooltip: 'Nuevo',
-                child: const Icon(Icons.add),
-              ),
-              const SizedBox(width: 7),
-              // SizedBox(width: 10)
-              FloatingActionButton(
-                onPressed: () {
-                  context.read<TodosProvider>().refresh();
-                }, //Usa provider para actualizar.
-                tooltip: 'Actualizar',
-                child: const Icon(Icons.refresh),
-              ),
-            ],
-          ),
 
-          // floatingActionButton: FloatingActionButton(
-          //   onPressed: () {
-          //     context
-          // .read<TodosProvider>()
-          // .refresh(); //Usa provider para actualizar.
-          //   tooltip: 'Actualizar',
-          //   child: const Icon(Icons.refresh),
-          // ),
-        ));
+                  /* return Center(
+                      child: Text('Error: ${snapshot.error}')); */ //FOR DEBUG.
+                  /* return Center(
+                    child: Text(
+                        'Error: ${snapshot.error.runtimeType}')); */ //FOR BUILD
+                }
+                // Display a loading indicator while waiting
+                return const Center(child: CircularProgressIndicator());
+              },
+            ),
+            floatingActionButton: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FloatingActionButton(
+                  onPressed: () {
+                    late Todos todoNueva = Todos(
+                        userId: 1,
+                        id: -1,
+                        title: '',
+                        completed: false,
+                        sharedWithId: null);
+                    modalBSEditTask(context, todoNueva);
+                  },
+                  tooltip: 'Nuevo',
+                  child: const Icon(Icons.add),
+                ),
+                const SizedBox(width: 7),
+                // SizedBox(width: 10)
+                FloatingActionButton(
+                  onPressed: () {
+                    context.read<TodosProvider>().refresh();
+                  }, //Usa provider para actualizar.
+                  tooltip: 'Actualizar',
+                  child: const Icon(Icons.refresh),
+                ),
+              ],
+            ),
+          );
+        }));
   }
 
   Card tarjetasTareas(BuildContext context, todo, indexTodo) {
     /* int idDeTodo = todo.id; */
     bool isCompleted = todo.completed;
 
-    /* bool isCompleted =
-        false; //En estas lineas agrego compatibilidad para campo completed boleano o "boleaano SQL" (entero 1-0).
-
-    if (todo['completed'] is bool) {
-      isCompleted = todo['completed'];
-    } else if (todo['completed'] == 0) {
-      isCompleted = false;
-    } else {
-      isCompleted = true;
-    } */
+    final txtFldEditController = TextEditingController();
+    if (todo.title != null) {
+      txtFldEditController.text = todo.title;
+    }
 
     var checkbox0 = Checkbox(
       value: isCompleted,
       onChanged: (value) async {
-        /* print("En cambio, El Valor es: $value");
-        print("y todo completed es: $todo.completed"); */
         if (await toggleBd(id: todo.id, completed: value!)) {
-          /* setState(() {
-            // context.read<TodosProvider>().toggle(indexTodo, value);
-            // todo['completed'] = value;
-          }); */
-          /* print("prev read valor: $value y completed $todo.completed"); */
           if (context.mounted) {
             context.read<TodosProvider>().toggle(indexTodo, value);
             ScaffoldMessenger.of(context).showSnackBar(
@@ -259,10 +231,41 @@ class _MainPageState extends State<MainPage> {
               // Otherwise, the height will be half the height of the screen.
               return Wrap(children: [
                 ListTile(
-                  title: Text(todo.title),
-                  trailing: checkbox0,
+                  // leading: checkbox0,
+                  title: TextField(
+                      controller: txtFldEditController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Tarea',
+                      ),
+                      autofocus: true,
+                      /* onSubmitted: (value) {
+                        if (todo.title != value && todo.title.isNotEmpty) {
+                          todo.title = value;
+                          updateTask(context, todo);
+                        }
+                        Navigator.pop(context);
+                      }, */
+                      onChanged: (value) {}),
+                  /* trailing: checkbox0, */
                 ),
-                const SizedBox(height: 200.0),
+                ElevatedButton(
+                  onPressed: () {
+                    if (todo.title != txtFldEditController.value.text &&
+                        todo.title.isNotEmpty) {
+                      todo.title = txtFldEditController.value.text;
+                      context
+                          .read<TodosProvider>()
+                          .updateTodo(todo.id, todo.title, todo.completed);
+
+                      updateTask(context, todo);
+                      // TodosProvider().refresh();
+                    }
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Actualizar"),
+                ),
+                const SizedBox(height: 300.0),
                 ListTile(
                   title: const Text('Cerrar'),
                   onTap: () {
@@ -278,8 +281,16 @@ class _MainPageState extends State<MainPage> {
           // );
         },
         child: ListTile(
+          leading: checkbox0,
           title: Text(todo.title),
-          trailing: checkbox0,
+          trailing: IconButton( //TODO borrar esto que dejo de ejemplo, y hacer algo para editar que funcione bien.
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              context.read<ActiveTodoProvider>().setActiveTodo(todo);
+              modalBSEditTask(context, todo);
+            },
+          ),
+          /* trailing: checkbox0, */
         ),
       ),
     );
@@ -366,29 +377,4 @@ class _MainPageState extends State<MainPage> {
 //ToggleBD Ubic.
 //addNewTask Ubic.
 
-
-
-//   floatingActionButton: Row(
-//     mainAxisSize: MainAxisSize.min,
-//     children: [
-//       FloatingActionButton(
-//         onPressed: () {
-//           getData();
-//         },
-//         tooltip: 'Anterior',
-//         child: const Icon(Icons.navigate_before_rounded),
-//       ),
-//       const SizedBox(width: 14),
-//       FloatingActionButton(
-//         onPressed: () {
-//           getData();
-//         },
-//         tooltip: 'Siguiente',
-//         child: const Icon(Icons.navigate_next_rounded),
-//       ),
-//     ],
-//   ),
-// );
-// }
-// }
 //para build el release: flutter build apk --release++

@@ -7,7 +7,24 @@ class TodosProvider extends ChangeNotifier {
   Future<List<Todos>>? _todos = fetchTodos();
 
   Future<List<Todos>>? get todos =>
-      _todos; //El getter es el que voy a acceder dodos lados.
+      _todos; //El getter es el que voy a acceder todos lados.
+
+  Future<void> updateTodo(int id, String newTitle, bool newCompleted) async {
+    //Triada por Gemini on IDX... no le cambié nada porque se ve igual que lo que yo hacìa....
+    //Pero esta anda......
+    List<Todos>? tempTodos = await _todos;
+    if (tempTodos != null) {
+      final index = tempTodos.indexWhere((todo) => todo.id == id);
+      if (index != -1) {
+        tempTodos[index].title = newTitle;
+        tempTodos[index].completed = newCompleted;
+        _todos = Future.value(tempTodos); // Update provider data
+        notifyListeners(); // Notify listeners
+      }
+    }
+  }
+
+
 
   /* no sirven porque entrgan un tipo Future, que no funciona.
   Future<bool> Function(int) get todoCompleted => (int idTodo) async {
@@ -37,12 +54,24 @@ class TodosProvider extends ChangeNotifier {
 
   Future<void> toggle(int id, bool completed) async {
     List<Todos>? tempTodos = await _todos;
-    if (tempTodos != null && id < tempTodos.length) {
+    if (tempTodos != null && tempTodos[id].id != -1) {
       tempTodos[id].completed = completed;
       _todos = Future.value(tempTodos);
       notifyListeners();
     }
   }
+
+//No le encuentro la vuelta......... No actualiza la Card.
+  /* Future<void> updateTask(int id, String title) async {
+    if (await todos != null) {
+      for (Todos todo in await todos!) {
+        if (todo.id == id) {
+          todo.title = title;
+          break;
+        }
+      }
+    }
+  } */
 
   /* void add(Todos todoNueva) {
     

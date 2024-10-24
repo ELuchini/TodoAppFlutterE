@@ -38,17 +38,7 @@ bool convertToBool(dynamic value) {
 
 // @JsonSerializable()//https://docs.flutter.dev/data-and-backend/serialization/json?gad_source=1&gclid=CjwKCAjwvKi4BhABEiwAH2gcw0visVoXRvDYrKC-8hHE3lypkUBBKO5l4qHpLJ97D2HkdC1I3bHEWxoCRZ4QAvD_BwE&gclsrc=aw.ds
 class Todos {
-  /* int userId;
-  int? id;
-  String title;
-  bool completed; */
 
-  /* Todos({
-    required this.userId,
-    required this.id,
-    required this.title,
-    required this.completed,
-  }); */
 
   int id;
   String title;
@@ -64,12 +54,6 @@ class Todos {
     required this.sharedWithId,
   });
 
-/*   factory Todos.fromJson(Map<String, dynamic> json) => Todos(
-        userId: json["userId"] as int?,
-        id: json["id"],
-        title: json["title"],
-        completed: convertToBool(json["completed"]),
-      ); */
   factory Todos.fromJson(Map<String, dynamic> json) => Todos(
         id: json["id"],
         title: json["title"],
@@ -78,12 +62,6 @@ class Todos {
         sharedWithId: json["shared_with_id"],
       );
 
-  /* Map<String, dynamic> toJson() => {
-        "userId": userId,
-        "id": id,
-        "title": title,
-        "completed": completed,
-      }; */
   Map<String, dynamic> toJson() => {
         "id": id,
         "title": title,
