@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:myapp/constants.dart';
+import 'package:myapp/utils/constants.dart';
 
 import '../models/todos.dart';
 

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:myapp/providers/todos_provider.dart';
 import 'package:provider/provider.dart';
 
-import 'infrastructure/data_sources/bd_op.dart';
-import 'infrastructure/models/todos.dart';
+import '../infrastructure/data_sources/bd_op.dart';
+import '../infrastructure/models/todos.dart';
 
 void modalBSEditTask(BuildContext context, Todos todoToEdit) {
   showModalBottomSheet(

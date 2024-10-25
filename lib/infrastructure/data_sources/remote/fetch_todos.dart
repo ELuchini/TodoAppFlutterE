@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:myapp/constants.dart';
+import 'package:myapp/utils/constants.dart';
 import 'package:myapp/infrastructure/models/todos.dart';
 
 Future<List<Todos>> fetchTodos({int usId = 1}) async {
