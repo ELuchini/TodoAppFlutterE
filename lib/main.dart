@@ -5,10 +5,11 @@
 // import 'package:myapp/infrastructure/models/todos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:myapp/utils/constants.dart';
 import 'package:myapp/widgets/bottom_sheet_edit_task.dart';
 import 'package:myapp/infrastructure/models/todos.dart';
 import 'package:myapp/providers/active_todo_provider.dart';
-import 'package:myapp/widgets/tarjeta_tareas.dart';
+import 'package:myapp/widgets/task_card.dart';
 // import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/providers/todos_provider.dart';
@@ -148,11 +149,10 @@ class _MainPageState extends State<MainPage> {
                 return const Center(child: CircularProgressIndicator());
               },
             ),
-            floatingActionButton: 
-                FloatingActionButton(
+            floatingActionButton: FloatingActionButton(
               onPressed: () {
                 late Todos todoNueva = Todos(
-                    userId: 1,
+                    userId: uID,
                     id: -1,
                     title: '',
                     completed: false,

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:myapp/infrastructure/data_sources/remote/fetch_todos.dart';
 import 'package:myapp/infrastructure/models/todos.dart';
@@ -10,7 +12,7 @@ class TodosProvider extends ChangeNotifier {
       _todos; //El getter es el que voy a acceder todos lados.
 
   Future<void> updateTodo(int id, String newTitle, bool newCompleted) async {
-    //Triada por Gemini on IDX... no le cambié nada porque se ve igual que lo que yo hacìa....
+    //Tirada por Gemini on IDX... no le cambié nada porque se ve igual que lo que yo hacìa....
     //Pero esta anda......
     List<Todos>? tempTodos = await _todos;
     if (tempTodos != null) {
@@ -48,6 +50,9 @@ class TodosProvider extends ChangeNotifier {
   // }
 
   Future<void> refresh() async {
+    // Timer(duration: const Duration(milliseconds: 500)){//Between the new task send to db, and the refresh, maybe its no enought time. 
+    //   _todos = fetchTodos();
+    // }
     _todos = fetchTodos();
     notifyListeners();
   }

@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:myapp/providers/todos_provider.dart';
-import 'package:provider/provider.dart';
 
 import '../infrastructure/data_sources/bd_op.dart';
 import '../infrastructure/models/todos.dart';
@@ -16,7 +14,10 @@ void modalBSEditTask(BuildContext context, Todos todoToEdit) {
         borderRadius: BorderRadius.circular(20),
       ),
       sheetAnimationStyle: AnimationStyle(
-          duration: const Duration(milliseconds: 500), curve: Curves.easeIn),
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeIn,
+          reverseDuration: Duration(milliseconds: 300),
+          reverseCurve: Curves.easeInOut),
       builder: (context) {
         // Using Wrap makes the bottom sheet height the height of the content.
         // Otherwise, the height will be half the height of the screen.
@@ -46,7 +47,7 @@ void modalBSEditTask(BuildContext context, Todos todoToEdit) {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ElevatedButton(
-                        onPressed: () async {
+                        onPressed: () {
                           /* ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Cancelando...',
@@ -56,8 +57,11 @@ void modalBSEditTask(BuildContext context, Todos todoToEdit) {
                                 duration: Duration(milliseconds: 500),
                               ),
                             ); */
-                          await Future.delayed(
-                              const Duration(milliseconds: 800));
+                          /* await Future.delayed(
+                              const Duration(milliseconds: 800)); */
+                          Timer(const Duration(milliseconds: 1), () {
+                            // Navigator.pop(context, "");
+                          });
                           Navigator.pop(context, "Cancelando...");
                         },
                         child: const Text('Cancelar'),
@@ -67,24 +71,31 @@ void modalBSEditTask(BuildContext context, Todos todoToEdit) {
                         onPressed: () {
                           if (todoToEdit.title != "") {
                             addNewTask(context, todoToEdit);
-                            context.read<TodosProvider>().refresh();
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            // context.read<TodosProvider>().refresh();
+                            /*  ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Tarea creada.'),
                               ),
-                            );
+                            ); */
+                            Timer(const Duration(milliseconds: 150), () {
+                              Navigator.pop(context, "Tarea creada...");
+                            });
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            /* ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Cancelando creación de tarea.'),
                               ),
-                            );
+                            ); */
+                            Timer(const Duration(milliseconds: 150), () {
+                              Navigator.pop(
+                                  context, "Cancelando creación de tarea...");
+                            });
                           }
                           // Future.delayed(const Duration(seconds: 3));
-                          Timer(const Duration(seconds: 2), () {
+                          /* Timer(const Duration(seconds: 1), () {
                             /* setState(() {}); */
                             Navigator.pop(context, "");
-                          });
+                          }); */
                           // Navigator.pop(context);
                         },
                         child: const Text('Guardar'),
@@ -101,7 +112,7 @@ void modalBSEditTask(BuildContext context, Todos todoToEdit) {
         content: Text(value,
             /* 'Cancelando...', */
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-        duration: const Duration(milliseconds: 4500),
+        duration: const Duration(milliseconds: 1500),
       ));
     }
   });

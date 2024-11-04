@@ -5,6 +5,7 @@ import 'package:myapp/infrastructure/data_sources/bd_op.dart';
 import 'package:myapp/infrastructure/models/todos.dart';
 import 'package:myapp/providers/active_todo_provider.dart';
 import 'package:myapp/providers/todos_provider.dart';
+import 'package:myapp/widgets/trad_view.dart';
 import 'package:provider/provider.dart';
 
 Card taskCard(BuildContext context, Todos todo, int indexTodo) {
@@ -37,7 +38,6 @@ Card taskCard(BuildContext context, Todos todo, int indexTodo) {
   }
 
   SnackBar eliminarTarea(BuildContext currentContext) {
-
     return SnackBar(
       duration: const Duration(milliseconds: 2500),
       behavior: SnackBarBehavior.floating,
@@ -198,13 +198,46 @@ Card taskCard(BuildContext context, Todos todo, int indexTodo) {
       child: ListTile(
         leading: checkbox0,
         title: Text(todo.title),
-        /* trailing: IconButton( //TODO borrar esto que dejo de ejemplo, y hacer algo para editar que funcione bien.
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              context.read<ActiveTodoProvider>().setActiveTodo(todo);
-              modalBSEditTask(context, todo);
-            },
-          ), */
+        trailing: IconButton(
+          //TODO borrar esto que dejo de ejemplo, y hacer algo para editar que funcione bien.
+          icon: const Icon(Icons.trending_up),
+          onPressed: () {
+            context.read<ActiveTodoProvider>().setActiveTodo(todo);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const Scaffold(
+                  body: Center(
+                    child: TradingViewChart(),
+                  ),
+                ),
+              ),
+              // TradingViewChart(),
+            );
+            /* showModalBottomSheet(
+              context: context,
+              builder: (BuildContext context) {
+                return Container(
+                  height: 200,
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        const Text('BottomSheet'),
+                        /* ElevatedButton(
+                          child: const Text('Close BottomSheet'),
+                          onPressed: () => Navigator.pop(context),
+                        ), */
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ); */
+          },
+        ),
         /* trailing: checkbox0, */
       ),
     ),
