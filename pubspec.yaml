@@ -34,6 +34,9 @@ dependencies:
     sdk: flutter
   provider: ^6.1.2
   webview_flutter: 
+  #PARA AGREGAR EL LOGIN QUE ME TIRA V0 (GENERADOR DE UI DE VERCEL).
+  # supabase_flutter: ^2.8.0
+  # supabase_auth_ui: ^0.5.4
 
 
   # The following adds the Cupertino Icons font to your application.
