@@ -4,15 +4,17 @@
 
 // import 'package:myapp/infrastructure/models/todos.dart';
 import 'package:flutter/material.dart';
-// import 'package:myapp/pages/auth/auth_page.dart';
-import 'package:myapp/pages/home/main_page.dart';
+import 'package:myapp/infrastructure/data_sources/remote/api_service.dart';
+import 'package:myapp/pages/auth/auth_page.dart';
+// import 'package:myapp/pages/home/main_page.dart';
 import 'package:myapp/providers/active_todo_provider.dart';
 // import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/providers/todos_provider.dart';
 
 // void main() => runApp(const TareasE());
-void main() {
+void main() async {
+  await ApiService().init();
   runApp(
     MultiProvider(
       providers: [
@@ -42,9 +44,8 @@ class TareasE extends StatelessWidget {
         brightness: Brightness.dark,
         useMaterial3: true,
       ),
-      home: const MainPage(title: 'Todo Listo'),
-      //home: const AuthPage(),
+      // home: const MainPage(title: 'Todo Listo'),
+      home: const AuthPage(),
     );
   }
 }
-

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 class RequestQueue {
   final List<Map<String, dynamic>> _queue = [];
@@ -25,9 +26,13 @@ class RequestQueue {
           method: request['method'],
         ),
       );
-      print('Respuesta: $response');
+      if (kDebugMode) {
+        print('Respuesta: $response');
+      }
     } catch (e) {
-      print('Error: $e');
+      if (kDebugMode) {
+        print('Error: $e');
+      }
     }
 
     _processNextRequest();

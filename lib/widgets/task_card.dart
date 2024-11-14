@@ -1,11 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:myapp/infrastructure/data_sources/bd_op.dart';
+import 'package:myapp/infrastructure/data_sources/remote/api_service.dart';
 import 'package:myapp/infrastructure/models/todos.dart';
 import 'package:myapp/providers/active_todo_provider.dart';
 import 'package:myapp/providers/todos_provider.dart';
-import 'package:myapp/widgets/trad_view.dart';
+//import 'package:myapp/widgets/trad_view.dart';
 import 'package:provider/provider.dart';
 
 Card taskCard(BuildContext context, Todos todo, int indexTodo) {
@@ -63,7 +63,8 @@ Card taskCard(BuildContext context, Todos todo, int indexTodo) {
         textColor: Colors.red,
         onPressed: () async {
           /* final BuildContext currentContext = context; */
-          if (await deleteTodo(context.read<ActiveTodoProvider>().activeTodo)) {
+          if (await ApiService()
+              .deleteTodo(context.read<ActiveTodoProvider>().activeTodo)) {
             if (currentContext.mounted) {
               currentContext.read<TodosProvider>().refresh();
               ScaffoldMessenger.of(currentContext).showSnackBar(
@@ -92,7 +93,7 @@ Card taskCard(BuildContext context, Todos todo, int indexTodo) {
   var checkbox0 = Checkbox(
     value: isCompleted,
     onChanged: (value) async {
-      if (await toggleBd(id: todo.id, completed: value!)) {
+      if (await ApiService().toggleBd(id: todo.id, completed: value!)) {
         if (context.mounted) {
           context.read<TodosProvider>().toggle(indexTodo, value);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -165,15 +166,36 @@ Card taskCard(BuildContext context, Todos todo, int indexTodo) {
                 /* trailing: checkbox0, */
               ),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (todo.title != txtFldEditController.value.text &&
                       todo.title.isNotEmpty) {
                     todo.title = txtFldEditController.value.text;
-                    context
-                        .read<TodosProvider>()
-                        .updateTodo(todo.id, todo.title, todo.completed);
+                    // context
+                    //     .read<TodosProvider>()
+                    //     .updateTodo(todo.id, todo.title, todo.completed);
+                    //Debe ocurrir cuando me confirma la bd que se actualizó Ok.
 
-                    updateTask(context, todo);
+                    if (await ApiService().updateTask(context, todo)) {
+                      if (context.mounted) {
+                        context
+                            .read<TodosProvider>()
+                            .updateTodo(todo.id, todo.title, todo.completed);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Tarea actualizada.'),
+                            duration: Duration(milliseconds: 500),
+                          ),
+                        );
+                      }
+                    } else {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Error al actualizar la tarea.'),
+                          ),
+                        );
+                      }
+                    }
                     // TodosProvider().refresh();
                   }
                   Navigator.pop(context);
@@ -198,7 +220,7 @@ Card taskCard(BuildContext context, Todos todo, int indexTodo) {
       child: ListTile(
         leading: checkbox0,
         title: Text(todo.title),
-        trailing: IconButton(
+        /* trailing: IconButton(
           //TODO borrar esto que dejo de ejemplo, y hacer algo para editar que funcione bien.
           icon: const Icon(Icons.trending_up),
           onPressed: () {
@@ -213,7 +235,7 @@ Card taskCard(BuildContext context, Todos todo, int indexTodo) {
                 ),
               ),
               // TradingViewChart(),
-            );
+            ); 
             /* showModalBottomSheet(
               context: context,
               builder: (BuildContext context) {
@@ -237,7 +259,7 @@ Card taskCard(BuildContext context, Todos todo, int indexTodo) {
               },
             ); */
           },
-        ),
+        ), */
         /* trailing: checkbox0, */
       ),
     ),

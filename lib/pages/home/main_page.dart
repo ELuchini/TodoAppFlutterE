@@ -1,12 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/infrastructure/models/todos.dart';
+import 'package:myapp/pages/auth/auth_page.dart';
 import 'package:myapp/providers/active_todo_provider.dart';
 import 'package:myapp/providers/todos_provider.dart';
 import 'package:myapp/utils/constants.dart';
 import 'package:myapp/widgets/bottom_sheet_edit_task.dart';
 import 'package:myapp/widgets/task_card.dart';
 import 'package:provider/provider.dart';
+import 'package:myapp/utils/st.dart';
 
 class MainPage extends StatefulWidget {
   final String title;
@@ -30,6 +32,15 @@ class _MainPageState extends State<MainPage> {
   //   super.initState();
 
   // }
+  Future<void> _logout(BuildContext context) async {
+    // Borramos el token al cerrar sesión
+    await deleteToken();
+
+    // Navegamos de vuelta a la página de autenticación
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => AuthPage()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +70,12 @@ class _MainPageState extends State<MainPage> {
                         fontSize: 8,
                         fontWeight: FontWeight.w600));
               }),
+              actions: [
+                IconButton(
+                  onPressed: () => _logout(context),
+                  icon: const Icon(Icons.logout),
+                ),
+              ],
             ),
             body: FutureBuilder<List<Todos>>(
               future: todosProvider.todos,
@@ -115,7 +132,7 @@ class _MainPageState extends State<MainPage> {
                     title: '',
                     completed: false,
                     sharedWithId: null);
-                modalBSEditTask(context, todoNueva);
+                modalBSNewTask(context, todoNueva);
               },
               tooltip: 'Nuevo',
               child: const Icon(Icons.add),

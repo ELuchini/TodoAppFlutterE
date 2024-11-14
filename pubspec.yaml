@@ -33,7 +33,9 @@ dependencies:
   flutter:
     sdk: flutter
   provider: ^6.1.2
-  webview_flutter: 
+  #Saco webview porque es incompatible con web.
+  #webview_flutter: 
+  flutter_secure_storage: ^9.2.2
   #PARA AGREGAR EL LOGIN QUE ME TIRA V0 (GENERADOR DE UI DE VERCEL).
   # supabase_flutter: ^2.8.0
   # supabase_auth_ui: ^0.5.4

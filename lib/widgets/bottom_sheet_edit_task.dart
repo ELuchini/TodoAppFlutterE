@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:myapp/infrastructure/data_sources/remote/api_service.dart';
+import 'package:myapp/providers/todos_provider.dart';
+import 'package:provider/provider.dart';
 
-import '../infrastructure/data_sources/bd_op.dart';
 import '../infrastructure/models/todos.dart';
 
-void modalBSEditTask(BuildContext context, Todos todoToEdit) {
+void modalBSNewTask(BuildContext context, Todos newTodo) {
   showModalBottomSheet(
       context: context,
       showDragHandle: true,
@@ -34,7 +36,7 @@ void modalBSEditTask(BuildContext context, Todos todoToEdit) {
                       labelText: 'Tarea',
                     ),
                     onChanged: (value) {
-                      todoToEdit.title = value;
+                      newTodo.title = value;
                     },
                     onSubmitted: (value) {},
                     autofocus: true,
@@ -68,35 +70,29 @@ void modalBSEditTask(BuildContext context, Todos todoToEdit) {
                       ),
                       const SizedBox(width: 10),
                       ElevatedButton(
-                        onPressed: () {
-                          if (todoToEdit.title != "") {
-                            addNewTask(context, todoToEdit);
-                            // context.read<TodosProvider>().refresh();
-                            /*  ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Tarea creada.'),
-                              ),
-                            ); */
+                        onPressed: () async {
+                          if (newTodo.title != "") {
+                            if (await ApiService()
+                                .addNewTask(context, newTodo)) {
+                              context
+                                  .read<TodosProvider>()
+                                  .addTodoOfline(newTodo);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Error al crear la tarea.'),
+                                ),
+                              );
+                            }
                             Timer(const Duration(milliseconds: 150), () {
                               Navigator.pop(context, "Tarea creada...");
                             });
                           } else {
-                            /* ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Cancelando creación de tarea.'),
-                              ),
-                            ); */
                             Timer(const Duration(milliseconds: 150), () {
                               Navigator.pop(
                                   context, "Cancelando creación de tarea...");
                             });
                           }
-                          // Future.delayed(const Duration(seconds: 3));
-                          /* Timer(const Duration(seconds: 1), () {
-                            /* setState(() {}); */
-                            Navigator.pop(context, "");
-                          }); */
-                          // Navigator.pop(context);
                         },
                         child: const Text('Guardar'),
                       ),

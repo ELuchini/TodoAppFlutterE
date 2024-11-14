@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:myapp/infrastructure/data_sources/remote/fetch_todos.dart';
+import 'package:myapp/infrastructure/data_sources/remote/api_service.dart';
 import 'package:myapp/infrastructure/models/todos.dart';
 //Base uso provider https://www.youtube.com/watch?v=tuQ8j0IZI-0
 
 class TodosProvider extends ChangeNotifier {
-  Future<List<Todos>>? _todos = fetchTodos();
+  Future<List<Todos>>? _todos = ApiService().fetchTodos();
 
   Future<List<Todos>>? get todos =>
       _todos; //El getter es el que voy a acceder todos lados.
@@ -26,7 +26,15 @@ class TodosProvider extends ChangeNotifier {
     }
   }
 
-
+  //TODO Controlar que ande, o Hacer andar... sería para que al agregar una nueva, se actualice la pantalla solo con recibir el 201 de CREADO.
+  Future<void> addTodoOfline(Todos todoNueva) async {
+    List<Todos>? tempTodos = await _todos;
+    if (tempTodos != null) {
+      tempTodos.add(todoNueva);
+      _todos = Future.value(tempTodos); // Update provider data
+      notifyListeners(); // Notify listeners
+    }
+  }
 
   /* no sirven porque entrgan un tipo Future, que no funciona.
   Future<bool> Function(int) get todoCompleted => (int idTodo) async {
@@ -50,10 +58,10 @@ class TodosProvider extends ChangeNotifier {
   // }
 
   Future<void> refresh() async {
-    // Timer(duration: const Duration(milliseconds: 500)){//Between the new task send to db, and the refresh, maybe its no enought time. 
+    // Timer(duration: const Duration(milliseconds: 500)){//Between the new task send to db, and the refresh, maybe its no enought time.
     //   _todos = fetchTodos();
     // }
-    _todos = fetchTodos();
+    _todos = ApiService().fetchTodos();
     notifyListeners();
   }
 

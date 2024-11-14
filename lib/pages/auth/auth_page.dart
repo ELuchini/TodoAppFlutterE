@@ -1,8 +1,13 @@
+//Generado por V0.dev en implementación de autenticación. 11-11-24
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:myapp/pages/home/main_page.dart';
 import 'package:myapp/utils/constants.dart';
+import 'package:myapp/utils/st.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -26,24 +31,50 @@ class _AuthPageState extends State<AuthPage> {
 
       final urlLoginSignup = _isLogin ? '$url/login' : '$url/signup';
       final dio = Dio();
-      
+      final data = jsonEncode({
+        'email': _emailController.text,
+        'password': _passwordController.text,
+      });
+
+      if (kDebugMode) {
+        print(
+            'email: ${_emailController.text} password: ${_passwordController.text}');
+        print(
+          'data: $data',
+        );
+        print(
+          'URL: $urlLoginSignup',
+        );
+      }
+
       try {
         final response = await dio.post(
           urlLoginSignup,
-          data: {
-            'email': _emailController.text,
-            'password': _passwordController.text,
-          },
+          options: Options(headers: {
+            HttpHeaders.contentTypeHeader: "application/json",
+          }),
+          data: data,
+          // data: {
+          //   'email': '${_emailController.text}',
+          //   'password': '${_passwordController.text}',
+          // },
         );
 
         if (response.statusCode == 200) {
+          // Asumimos que el token viene en la respuesta como 'token'
+          final token = response.data['token'];
           // Handle successful login/signup
           if (kDebugMode) {
             print('Success: ${response.data}');
           }
+          saveToken(token); // Save token to secure storage
+
           // Navigate to home page
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => MainPage(title: 'Todo Listo',)),
+            MaterialPageRoute(
+                builder: (context) => MainPage(
+                      title: 'Todo Listo',
+                    )),
           );
         } else {
           // Handle error
@@ -51,7 +82,8 @@ class _AuthPageState extends State<AuthPage> {
             print('Error: ${response.data}');
           }
           // Show error message to user
-          _showErrorDialog('Login failed. Please try again.');
+          // _showErrorDialog('Login failed. Please try again.');
+          _showErrorDialog('Ingreso fallido. Volvé a intentar.');
         }
       } catch (e) {
         // Handle network errors
@@ -67,7 +99,8 @@ class _AuthPageState extends State<AuthPage> {
           }
         }
         // Show error message to user
-        _showErrorDialog('An error occurred. Please try again later.');
+        // _showErrorDialog('An error occurred. Please try again later.');
+        _showErrorDialog('Ocurrió un error. Volvé a intentar en un rato.');
       }
 
       setState(() {
@@ -80,14 +113,16 @@ class _AuthPageState extends State<AuthPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('An Error Occurred'),
+        // title: const Text('An Error Occurred'),
+        title: const Text('Occurrió un Error'),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
             },
-            child: const Text('Okay'),
+            // child: const Text('Okay'),
+            child: const Text('Aceptar'),
           )
         ],
       ),
@@ -102,7 +137,11 @@ class _AuthPageState extends State<AuthPage> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Colors.blue.shade300, Colors.purple.shade300],
+            colors: [
+              const Color.fromARGB(255, 60, 18, 230),
+              const Color.fromARGB(255, 22, 194, 96)
+            ],
+            // colors: [Colors.blue.shade300, Colors.purple.shade300],
           ),
         ),
         child: SafeArea(
@@ -114,7 +153,9 @@ class _AuthPageState extends State<AuthPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      _isLogin ? 'Welcome Back' : 'Create Account',
+                      _isLogin
+                          ? 'Bienvenido'
+                          : 'Crear Cuenta', //'Welcome Back' : 'Create Account',
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -141,7 +182,7 @@ class _AuthPageState extends State<AuthPage> {
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Please enter your email';
+                                    return 'Ingresá tu email'; //'Please enter your email';
                                   }
                                   return null;
                                 },
@@ -150,13 +191,13 @@ class _AuthPageState extends State<AuthPage> {
                               TextFormField(
                                 controller: _passwordController,
                                 decoration: const InputDecoration(
-                                  labelText: 'Password',
+                                  labelText: 'Contraseña', //'Password',
                                   prefixIcon: Icon(Icons.lock),
                                 ),
                                 obscureText: true,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Please enter your password';
+                                    return 'Ingresá tu contraseña'; //'Please enter your password';
                                   }
                                   return null;
                                 },
@@ -169,20 +210,22 @@ class _AuthPageState extends State<AuthPage> {
                                 ),
                                 child: _isLoading
                                     ? const CircularProgressIndicator()
-                                    : Text(_isLogin ? 'Login' : 'Sign Up'),
+                                    : Text(_isLogin
+                                        ? 'Ingresá'
+                                        : 'Registrate'), //'Login' : 'Sign Up'),
                               ),
-                              const SizedBox(height: 16),
+                              // const SizedBox(height: 16),
+                              const SizedBox(height: 7),
                               TextButton(
                                 onPressed: () {
                                   setState(() {
                                     _isLogin = !_isLogin;
                                   });
                                 },
-                                child: Text(
-                                  _isLogin
-                                      ? 'Need an account? Sign Up'
-                                      : 'Already have an account? Login',
-                                ),
+                                child: Text(_isLogin
+                                        ? 'No tenés cuenta? Registrate' //'Need an account? Sign Up'
+                                        : 'Ya tenés cuenta? Ingresá' //'Already have an account? Login',
+                                    ),
                               ),
                             ],
                           ),
