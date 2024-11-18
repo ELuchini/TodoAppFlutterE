@@ -183,6 +183,33 @@ class AuthPageState extends State<AuthPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    // Agregar un espacio entre el logo y la parte superior
+                    const SizedBox(height: 16),
+                    // Agregar la imagen del logo
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: ShaderMask(
+                        shaderCallback: (Rect bounds) {
+                          return LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withOpacity(1.0),
+                            ],
+                          ).createShader(bounds);
+                        },
+                        blendMode:
+                            BlendMode.dstIn, // Difumina hacia transparente
+                        child: Image.asset(
+                          'assets/icon/icon-todo-listo.png',
+                          height: 100,
+                          width: 100,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16), // Espaciado entre logo y texto
                     Text(
                       _isLogin
                           ? 'Bienvenido'
