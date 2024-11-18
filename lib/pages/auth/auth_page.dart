@@ -13,10 +13,10 @@ class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
 
   @override
-  _AuthPageState createState() => _AuthPageState();
+  AuthPageState createState() => AuthPageState();
 }
 
-class _AuthPageState extends State<AuthPage> {
+class AuthPageState extends State<AuthPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -76,6 +76,15 @@ class _AuthPageState extends State<AuthPage> {
                       title: 'Todo Listo',
                     )),
           );
+        } else if (response.statusCode == 201) {
+          //Registro correcto.
+          if (kDebugMode) {
+            print('Success: ${response.data}');
+          }
+
+          _isLogin = !_isLogin;
+
+          _showRegistrationOk(context);
         } else {
           // Handle error
           if (kDebugMode) {
@@ -126,6 +135,28 @@ class _AuthPageState extends State<AuthPage> {
           )
         ],
       ),
+    );
+  }
+
+  void _showRegistrationOk(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx2) {
+        return AlertDialog(
+          title: Text('¡Registro exitoso!'),
+          content: Text(
+              'Te has registrado correctamente. Por favor, inicia sesión para continuar.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx2).pop();
+              },
+              // child: const Text('Okay'),
+              child: const Text('Aceptar'),
+            )
+          ],
+        );
+      },
     );
   }
 
@@ -215,7 +246,7 @@ class _AuthPageState extends State<AuthPage> {
                                         : 'Registrate'), //'Login' : 'Sign Up'),
                               ),
                               // const SizedBox(height: 16),
-                              const SizedBox(height: 7),
+                              const SizedBox(height: 5),
                               TextButton(
                                 onPressed: () {
                                   setState(() {

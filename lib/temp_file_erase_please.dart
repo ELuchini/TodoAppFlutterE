@@ -8,3 +8,26 @@
 //   }),
 //   data: jsonEncode(json),
 // );
+
+/* import 'package:flutter/material.dart';
+
+void showRegistrationOk(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (ctx2) {
+      return AlertDialog(
+        title: Text('¡Registro exitoso!'),
+        content: Text('Te has registrado correctamente. Por favor, inicia sesión para continuar.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx2).pop();
+            },
+            // child: const Text('Okay'),
+            child: const Text('Aceptar'),
+          )
+        ],
+      );
+    },
+  );
+} */
