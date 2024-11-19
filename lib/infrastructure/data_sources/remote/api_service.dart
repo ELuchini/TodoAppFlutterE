@@ -132,6 +132,7 @@ class ApiService {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Tarea creada BD.'),
+            duration: Duration(milliseconds: 250),
           ),
         );
       }
@@ -166,6 +167,7 @@ class ApiService {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Tarea actualizada BD.'),
+            duration: Duration(milliseconds: 250),
           ),
         );
       }

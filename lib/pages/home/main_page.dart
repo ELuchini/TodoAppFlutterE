@@ -36,10 +36,23 @@ class _MainPageState extends State<MainPage> {
     // Borramos el token al cerrar sesión
     await deleteToken();
 
+    // Clear the TodosProvider data
+    Provider.of<TodosProvider>(context, listen: false).clearTodos();
+
     // Navegamos de vuelta a la página de autenticación
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => AuthPage()),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Trigger an initial data fetch
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      TodosProvider todosProvider = context.read<TodosProvider>();
+      todosProvider.refresh();
+    });
   }
 
   @override
@@ -74,6 +87,7 @@ class _MainPageState extends State<MainPage> {
                 IconButton(
                   onPressed: () => _logout(context),
                   icon: const Icon(Icons.logout),
+                  color: Colors.white,
                 ),
               ],
             ),

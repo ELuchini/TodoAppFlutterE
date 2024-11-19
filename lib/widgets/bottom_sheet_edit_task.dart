@@ -104,11 +104,12 @@ void modalBSNewTask(BuildContext context, Todos newTodo) {
             ));
       }).then((value) {
     if (value != "") {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(value,
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(value,
             /* 'Cancelando...', */
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-        duration: const Duration(milliseconds: 1500),
+            duration: const Duration(milliseconds: 250), 
       ));
     }
   });

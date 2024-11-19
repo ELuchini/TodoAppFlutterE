@@ -36,6 +36,12 @@ class TodosProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> clearTodos() async {
+      _todos = Future.value([]); // Set _todos to an empty list on logout.
+      notifyListeners(); // Notify listeners about the change
+  }
+
+
   /* no sirven porque entrgan un tipo Future, que no funciona.
   Future<bool> Function(int) get todoCompleted => (int idTodo) async {
         List<Todos>? tempTodos = await _todos;
