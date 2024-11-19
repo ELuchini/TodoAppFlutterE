@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/infrastructure/data_sources/remote/api_service.dart';
 import 'package:myapp/pages/auth/auth_page.dart';
+import 'package:myapp/pages/home/main_page.dart';
 // import 'package:myapp/pages/home/main_page.dart';
 import 'package:myapp/providers/active_todo_provider.dart';
 // import 'package:permission_handler/permission_handler.dart';
@@ -14,20 +15,30 @@ import 'package:myapp/providers/todos_provider.dart';
 
 // void main() => runApp(const TareasE());
 void main() async {
-  await ApiService().init();
+  // Asegurandonos de inicializar el entorno de Flutter
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final apiService = ApiService();
+  await apiService.init();
+  final isValid = await apiService.isTokenValid();
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => TodosProvider()),
         ChangeNotifierProvider(create: (context) => ActiveTodoProvider()),
       ],
-      child: const TareasE(),
+      child: TareasE(
+        isLoggedIn: isValid,
+      ),
     ),
   );
 }
 
 class TareasE extends StatelessWidget {
-  const TareasE({super.key});
+  // const TareasE({super.key});
+  final bool isLoggedIn;
+
+  const TareasE({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +56,11 @@ class TareasE extends StatelessWidget {
         useMaterial3: true,
       ),
       // home: const MainPage(title: 'Todo Listo'),
-      home: const AuthPage(),
+      home: isLoggedIn
+          ? MainPage(
+              title: 'Todo Listo',
+            )
+          : AuthPage(),
     );
   }
 }

@@ -1,6 +1,7 @@
 //Generado por V0.dev en implementación de autenticación. 11-11-24
 import 'dart:convert';
 
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,29 @@ class ApiService {
         },
       ),
     );
+  }
+
+  Future<bool> isTokenValid() async {
+    try {
+      final token = await _storage.read(key: 'auth_token');
+      if (token == null) {
+        if (kDebugMode) {
+          print('Token no encontrado');
+        }
+        return false;
+      }
+
+      // try {
+      final jwt = JWT.decode(token);
+      final exp = jwt.payload['exp']; // Fecha de expiración en segundos
+      final currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      return exp != null && exp > currentTime;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Token inválido: $e');
+      }
+      return false;
+    }
   }
 
   Future<Response> get(String path) async {
