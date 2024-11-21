@@ -16,9 +16,9 @@ void modalBSNewTask(BuildContext context, Todos newTodo) {
         borderRadius: BorderRadius.circular(20),
       ),
       sheetAnimationStyle: AnimationStyle(
-          duration: const Duration(milliseconds: 500),
+          duration: const Duration(milliseconds: 800),
           curve: Curves.easeIn,
-          reverseDuration: Duration(milliseconds: 300),
+          reverseDuration: Duration(milliseconds: 500),
           reverseCurve: Curves.easeInOut),
       builder: (context) {
         // Using Wrap makes the bottom sheet height the height of the content.
@@ -30,23 +30,26 @@ void modalBSNewTask(BuildContext context, Todos newTodo) {
             body: Center(
               child: Column(
                 children: [
-                  TextField(
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Tarea',
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: TextField(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Tarea',
+                      ),
+                      onChanged: (value) {
+                        newTodo.title = value;
+                      },
+                      onSubmitted: (value) {},
+                      autofocus: true,
                     ),
-                    onChanged: (value) {
-                      newTodo.title = value;
-                    },
-                    onSubmitted: (value) {},
-                    autofocus: true,
                   ),
                   const SizedBox(
                     height: 10,
                     width: 10,
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       ElevatedButton(
                         onPressed: () {
@@ -104,12 +107,11 @@ void modalBSNewTask(BuildContext context, Todos newTodo) {
             ));
       }).then((value) {
     if (value != "") {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(value,
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(value,
             /* 'Cancelando...', */
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-            duration: const Duration(milliseconds: 250), 
+        duration: const Duration(milliseconds: 250),
       ));
     }
   });
