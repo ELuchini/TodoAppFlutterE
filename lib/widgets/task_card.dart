@@ -19,7 +19,7 @@ Card taskCard(BuildContext context, Todos todo, int indexTodo) {
 
   SnackBar cartelBajo(todo) {
     return SnackBar(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 600),
       behavior: SnackBarBehavior.floating,
       margin: const EdgeInsets.all(10),
       shape: RoundedRectangleBorder(
@@ -118,11 +118,10 @@ Card taskCard(BuildContext context, Todos todo, int indexTodo) {
     color: Theme.of(context).cardTheme.surfaceTintColor,
     clipBehavior: Clip
         .hardEdge, //Sigo los datos de un ejemplo de tarjeta que viene en flutter y es cliqueable. Esto limita la animación del InkWell al tocar la tarjeta.
-    elevation: 3,
-    margin:
-        const EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0, bottom: 0.0),
+    elevation: 1,
+    margin: const EdgeInsets.only(left: 5.0, right: 5.0, top: 2.5, bottom: 2.5),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(25),
+      borderRadius: BorderRadius.circular(20),
     ),
     child: InkWell(
       splashColor: Theme.of(context)
@@ -218,6 +217,9 @@ Card taskCard(BuildContext context, Todos todo, int indexTodo) {
         // );
       },
       child: ListTile(
+        minVerticalPadding: 7.0,
+        contentPadding: EdgeInsets.all(1.0),
+        visualDensity: const VisualDensity(vertical: -4),
         leading: checkbox0,
         title: Text(todo.title),
         /* trailing: IconButton(
