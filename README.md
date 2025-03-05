@@ -1,16 +1,11 @@
 # Todo Listo
 
-A new Flutter project.
+Todo listo es mi proyecto de aprendizaje desde cero de Flutter, venía de probar React Native y buscaba una alternativa, a lo que me pareció interesante aprender Dart. 
 
-## Getting Started
+Remarco que el foco estuvo puesto en aprender, fuí mejorando de a poco lo que iba encontrando y detectando, no es ningún ejemplo de buenas prácticas. 
 
-This project is a starting point for a Flutter application.
+Vengo de un sector en el que no existe o no se usa un seguimiento de versiones como Git (Diseño industrial, programación cnc) que también es algo a lo que tengo que familiarizarme más, por ello me cuesta mucho deshacerme de código que puede resultar útil a futuro, y verán que está lleno de partes de código comentado, que debería haber sacado. Estimo que también es mi forma de ir aprendiendo. 
 
-A few resources to get you started if this is your first Flutter project:
+Documentación es algo pendiente aún en mi roadmap, entre varias otras cosas, espero cubrir mejor esos faltantes a medida que progreso. 
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Se agradece todo comentario positivo y/o feedback que aporte a mi aprendizaje. 
