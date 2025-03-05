@@ -85,6 +85,14 @@ class AuthPageState extends State<AuthPage> {
           _isLogin = !_isLogin;
 
           _showRegistrationOk(context);
+        } else if (response.statusCode == 403){
+          //Registro deshabilitado.
+          if (kDebugMode) {
+            print('Está el registro deshabilitado en el backend.');
+          }
+
+          _showErrorDialog('Por el momento tenemos el registro deshabilitado.');
+          
         } else {
           // Handle error
           if (kDebugMode) {
