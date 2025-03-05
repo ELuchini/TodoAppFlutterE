@@ -50,9 +50,15 @@ class AuthPageState extends State<AuthPage> {
       try {
         final response = await dio.post(
           urlLoginSignup,
-          options: Options(headers: {
-            HttpHeaders.contentTypeHeader: "application/json",
-          }),
+          options: Options(
+              headers: {
+                HttpHeaders.contentTypeHeader: "application/json",
+              },
+              validateStatus: (status) {
+                return status! <
+                    500; // Permite manejar errores 400-499 manualmente
+              }),
+
           data: data,
           // data: {
           //   'email': '${_emailController.text}',
@@ -85,14 +91,13 @@ class AuthPageState extends State<AuthPage> {
           _isLogin = !_isLogin;
 
           _showRegistrationOk(context);
-        } else if (response.statusCode == 403){
+        } else if (response.statusCode == 403) {
           //Registro deshabilitado.
           if (kDebugMode) {
             print('Está el registro deshabilitado en el backend.');
           }
 
           _showErrorDialog('Por el momento tenemos el registro deshabilitado.');
-          
         } else {
           // Handle error
           if (kDebugMode) {
