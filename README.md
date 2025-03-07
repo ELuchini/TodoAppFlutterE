@@ -4,4 +4,6 @@ Todo listo es mi proyecto de aprendizaje desde cero de Flutter, mi interés fue 
 
 Remarco que el foco estuvo puesto en aprender, fuí mejorandolo de acuerdo a los problemas que se presentaban. 
 
+A resumidas cuentas viene a ser un CRUD simple apuntado a probarlo en Android, que interactua con un backend NodeJs que lo comunica con una base de datos MySql. 
+
 Se agradece todo feedback que aporte a mi aprendizaje. 
